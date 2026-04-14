@@ -1,0 +1,47 @@
+EDGE LEDGER PHONE CARD - 2026-04-14
+
+Official picks: 3
+Bankroll (model_results): $1055.65
+Model ROI: 17.28%
+Settled picks: 19
+Open picks: 3
+Provider synced: No
+
+Provider notes: Provider quota exhausted before odds sync completed.
+
+Provider-safe mode: public-board model only, no hard pick cap.
+No-provider mode tightened the card to EV >= 5.25%, edge >= 4.00%, true probability >= 40.00%, quality >= 62, and daily risk cap <= 10.00%.
+No-provider mode blocks official picks above +175 unless live provider support is available.
+
+TODAY'S OFFICIAL CARD
+
+1. NHL - Colorado Avalanche at Calgary Flames
+   Colorado Avalanche -1.5 @ +160
+   True 58.63% | EV 52.44% | Stake $35.23
+   Max odds -142
+   Auto projected margin: -3.92 vs market +1.5.
+
+2. MLB - Boston Red Sox at Minnesota Twins
+   Minnesota Twins moneyline @ +113
+   True 60.64% | EV 29.17% | Stake $35.23
+   Max odds -154
+   Auto model leans Minnesota Twins on win rate, venue split, and core team strength.
+
+3. NBA - Portland Trail Blazers at Phoenix Suns
+   Over 216.5 @ -115
+   True 62.76% | EV 17.33% | Stake $35.11
+   Max odds -169
+   Auto total projection: 227.42 vs market 216.5.
+
+WATCHLIST
+
+1. UCL - Atlético Madrid moneyline @ +285
+   True 40.74% | EV 56.84% | Edge 8.88%
+2. NHL - Boston Bruins -1.5 @ +190
+   True 41.96% | EV 21.70% | Edge 8.86%
+3. UCL - Under 3.5 @ -110
+   True 60.95% | EV 16.35% | Edge 11.47%
+4. UCL - Under 3.5 @ -130
+   True 63.22% | EV 11.86% | Edge 10.16%
+5. NBA - Miami Heat moneyline @ +195
+   True 37.97% | EV 12.01% | Edge 5.47%

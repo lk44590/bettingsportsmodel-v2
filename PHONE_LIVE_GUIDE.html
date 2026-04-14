@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Live Access Guide</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f4ecdd; }
+        h1 { color: #25523a; text-align: center; }
+        .option { background: white; padding: 20px; margin: 20px 0; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { color: #192218; margin-top: 0; }
+        .easy { color: #25523a; font-weight: bold; }
+        .hard { color: #a34c39; font-weight: bold; }
+        code { background: #f4ecdd; padding: 2px 8px; border-radius: 4px; font-family: monospace; }
+        ol { padding-left: 20px; }
+        li { margin: 10px 0; }
+        button { background: #25523a; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>📱 Phone Live Access</h1>
+    <p style="text-align:center; color: #687463;">Refresh picks anytime from your phone</p>
+
+    <div class="option">
+        <h2>Option 1: Same WiFi <span class="easy">(Easiest - No Setup!)</span></h2>
+        <ol>
+            <li>Double-click <code>START_LIVE_SERVER.bat</code></li>
+            <li>It shows an IP address like <code>http://192.168.1.100:5000</code></li>
+            <li>Make sure phone and PC are on same WiFi</li>
+            <li>Open that IP in phone's browser</li>
+            <li>Tap "Refresh Picks Now" anytime!</li>
+        </ol>
+        <p><strong>Note:</strong> Only works when phone & PC are on same network.</p>
+    </div>
+
+    <div class="option">
+        <h2>Option 2: Internet Anywhere <span class="easy">(Best - Works Anywhere)</span></h2>
+        <ol>
+            <li>Download ngrok from <a href="https://ngrok.com/download">ngrok.com</a></li>
+            <li>Extract <code>ngrok.exe</code> to the Betting model folder</li>
+            <li>Create free account at ngrok.com, copy your authtoken</li>
+            <li>Open cmd in this folder, run: <code>ngrok authtoken YOUR_TOKEN</code></li>
+            <li>Double-click <code>START_WITH_NGROK.bat</code></li>
+            <li>It gives you a HTTPS URL like <code>https://abc123.ngrok.io</code></li>
+            <li>Bookmark that URL on your phone!</li>
+        </ol>
+        <p><strong>Works from anywhere</strong> - your phone can refresh even on 4G/5G.</p>
+    </div>
+
+    <div class="option">
+        <h2>Option 3: Auto-Daily (No Phone Refresh Needed)</h2>
+        <p>If you just want fresh picks every morning automatically:</p>
+        <ol>
+            <li>Run <code>SETUP_AUTO_DEPLOY.bat</code></li>
+            <li>It deploys to Netlify daily at 8 AM</li>
+            <li>Bookmark the Netlify URL on your phone</li>
+            <li>Phone shows new picks automatically each day</li>
+        </ol>
+    </div>
+
+    <p style="text-align:center; margin-top: 30px; color: #687463;">
+        All options keep your bet tracking saved to your phone!
+    </p>
+</body>
+</html>
