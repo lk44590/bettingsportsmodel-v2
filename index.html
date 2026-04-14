@@ -166,29 +166,36 @@
       fetch(`output/daily-card-${today}.json`)
         .then(r => r.json())
         .then(data => {
-          if (data.shortlist && data.shortlist.length > 0) {
+          const picks = Array.isArray(data) ? data : (data.shortlist || []);
+          if (picks.length > 0) {
             const container = document.getElementById('picks-container');
-            container.innerHTML = data.shortlist.map((pick, i) => `
+            container.innerHTML = picks.map((pick, i) => `
               <article class="pick">
                 <div class="rank">#${i+1}</div>
                 <p class="sport">${pick.sport}</p>
                 <h2 class="event">${pick.event}</h2>
-                <p class="bet">${pick.selection} @ ${pick.odds}</p>
+                <p class="bet">${pick.bet_type} @ ${pick.odds}</p>
                 <div class="grid">
-                  <div class="mini"><span>True</span><strong>${(pick.trueProbability*100).toFixed(1)}%</strong></div>
-                  <div class="mini"><span>EV</span><strong>${pick.ev}%</strong></div>
-                  <div class="mini"><span>Stake</span><strong>$${pick.stake}</strong></div>
-                  <div class="mini"><span>Edge</span><strong>${pick.edge}%</strong></div>
+                  <div class="mini"><span>True</span><strong>${pick.true_probability}</strong></div>
+                  <div class="mini"><span>EV</span><strong>${pick.ev}</strong></div>
+                  <div class="mini"><span>Stake</span><strong>${pick.stake}</strong></div>
+                  <div class="mini"><span>Edge</span><strong>${pick.edge_score}</strong></div>
                 </div>
               </article>
             `).join('');
+          } else {
+            document.getElementById('picks-container').innerHTML = `
+              <article class="pick">
+                <p style="text-align: center; padding: 20px;">No picks available for today.</p>
+              </article>
+            `;
           }
         })
         .catch(() => {
           document.getElementById('picks-container').innerHTML = `
             <article class="pick">
               <p style="text-align: center; padding: 20px;">
-                Visit <a href="output/daily-card-${today}.html">daily-card-${today}.html</a> for today's picks.
+                <a href="output/daily-card-${today}.html" style="color: var(--green); font-weight: 700;">View Today's Picks</a>
               </p>
             </article>
           `;
