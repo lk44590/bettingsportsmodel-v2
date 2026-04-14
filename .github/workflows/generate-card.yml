@@ -15,6 +15,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.PAT_TOKEN }}
       
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -31,8 +33,10 @@ jobs:
       run: |
         python generate_daily_card.py --skip-provider-sync
         
-    - name: Upload output files as artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: daily-card
-        path: output/
+    - name: Commit and push output files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add output/daily-card-*.html output/phone-card-*.html output/daily-card-*.json output/daily-candidates-*.json output/model-performance-*.json tracking/model_results.csv
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update daily card - $(date +%Y-%m-%d)"
+        git push origin main
