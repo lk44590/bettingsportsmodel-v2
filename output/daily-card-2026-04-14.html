@@ -212,7 +212,7 @@
       <p>The model scanned the configured ESPN league boards, synced the live provider feed when credentials were available, and then kept only the bets that still cleared the EV, edge, and quality filters after calibration, uncertainty cuts, bankroll discipline, and historical CLV/ROI guardrails.</p>
       <div class="summary">
         <div class="metric"><span class="metric-label">Date</span><div class="metric-value">2026-04-14</div></div>
-        <div class="metric"><span class="metric-label">Qualified Bets</span><div class="metric-value">42</div></div>
+        <div class="metric"><span class="metric-label">Qualified Bets</span><div class="metric-value">43</div></div>
         <div class="metric"><span class="metric-label">Final Picks</span><div class="metric-value">3</div></div>
         <div class="metric"><span class="metric-label">Current Bankroll</span><div class="metric-value">$1055.65</div></div>
         <div class="metric"><span class="metric-label">Ledger Source</span><div class="metric-value">model_results</div></div>
@@ -229,7 +229,7 @@
         <div class="metric"><span class="metric-label">Provider</span><div class="metric-value">the_odds_api</div></div>
         <div class="metric"><span class="metric-label">Requests Left</span><div class="metric-value">0</div></div>
       </div>
-      <p class="hero-note">Generated 2026-04-14 10:37 AM. Provider notes: Provider quota exhausted before odds sync completed. Provider-safe mode is active, so this card is using the public-board model without a hard pick cap. No-provider mode tightened the card to EV &gt;= 5.25%, edge &gt;= 4.00%, true probability &gt;= 40.00%, quality &gt;= 62, and daily risk cap &lt;= 10.00%. No-provider mode blocks official picks above +175 unless live provider support is available.</p>
+      <p class="hero-note">Generated 2026-04-14 11:41 AM. Provider notes: Provider quota exhausted before odds sync completed. Provider-safe mode is active, so this card is using the public-board model without a hard pick cap. No-provider mode tightened the card to EV &gt;= 5.25%, edge &gt;= 4.00%, true probability &gt;= 40.00%, quality &gt;= 62, and daily risk cap &lt;= 10.00%. No-provider mode blocks official picks above +175 unless live provider support is available.</p>
     </section>
 
     <section class="section">
@@ -418,13 +418,13 @@
         <tbody>
           
     <tr>
-      <td><strong>Edge below floor</strong></td>
-      <td>86</td>
+      <td><strong>EV below floor</strong></td>
+      <td>85</td>
     </tr>
     
 
     <tr>
-      <td><strong>EV below floor</strong></td>
+      <td><strong>Edge below floor</strong></td>
       <td>85</td>
     </tr>
     
@@ -443,7 +443,7 @@
 
     <tr>
       <td><strong>Positive odds above no-provider cap (+175)</strong></td>
-      <td>6</td>
+      <td>4</td>
     </tr>
     
         </tbody>
@@ -469,22 +469,11 @@
           
     <tr>
       <td><strong>Atlético Madrid moneyline</strong><br><span>UCL - Barcelona at Atlético Madrid</span></td>
-      <td>+285</td>
-      <td>40.74%</td>
-      <td>56.84%</td>
-      <td>8.88%</td>
-      <td>325</td>
-      <td class="">Filtered</td>
-    </tr>
-    
-
-    <tr>
-      <td><strong>Boston Bruins -1.5</strong><br><span>NHL - New Jersey Devils at Boston Bruins</span></td>
-      <td>+190</td>
-      <td>41.96%</td>
-      <td>21.70%</td>
-      <td>8.86%</td>
-      <td>210</td>
+      <td>+275</td>
+      <td>41.10%</td>
+      <td>54.12%</td>
+      <td>8.67%</td>
+      <td>314</td>
       <td class="">Filtered</td>
     </tr>
     
@@ -502,11 +491,11 @@
 
     <tr>
       <td><strong>Under 3.5</strong><br><span>UCL - Paris Saint-Germain at Liverpool</span></td>
-      <td>-130</td>
-      <td>63.22%</td>
-      <td>11.86%</td>
-      <td>10.16%</td>
-      <td>171</td>
+      <td>-125</td>
+      <td>62.95%</td>
+      <td>13.31%</td>
+      <td>10.32%</td>
+      <td>177</td>
       <td class="">Filtered</td>
     </tr>
     
@@ -518,6 +507,17 @@
       <td>12.01%</td>
       <td>5.47%</td>
       <td>155</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Montreal Canadiens moneyline</strong><br><span>NHL - Montreal Canadiens at Philadelphia Flyers</span></td>
+      <td>-205</td>
+      <td>70.15%</td>
+      <td>4.37%</td>
+      <td>5.67%</td>
+      <td>153</td>
       <td class="">Filtered</td>
     </tr>
     
@@ -555,23 +555,12 @@
 
     <tr>
       <td><strong>Carolina Hurricanes moneyline</strong><br><span>NHL - Carolina Hurricanes at New York Islanders</span></td>
-      <td>+124</td>
-      <td>61.17%</td>
-      <td>37.02%</td>
-      <td>18.38%</td>
-      <td>325</td>
+      <td>+130</td>
+      <td>60.49%</td>
+      <td>39.14%</td>
+      <td>18.79%</td>
+      <td>335</td>
       <td class="positive">Qualified</td>
-    </tr>
-    
-
-    <tr>
-      <td><strong>Atlético Madrid moneyline</strong><br><span>UCL - Barcelona at Atlético Madrid</span></td>
-      <td>+285</td>
-      <td>40.74%</td>
-      <td>56.84%</td>
-      <td>8.88%</td>
-      <td>325</td>
-      <td class="">Filtered</td>
     </tr>
     
 
@@ -587,6 +576,17 @@
     
 
     <tr>
+      <td><strong>Atlético Madrid moneyline</strong><br><span>UCL - Barcelona at Atlético Madrid</span></td>
+      <td>+275</td>
+      <td>41.10%</td>
+      <td>54.12%</td>
+      <td>8.67%</td>
+      <td>314</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
       <td><strong>Minnesota Twins moneyline</strong><br><span>MLB - Boston Red Sox at Minnesota Twins</span></td>
       <td>+113</td>
       <td>60.64%</td>
@@ -598,12 +598,12 @@
     
 
     <tr>
-      <td><strong>Under 9.0</strong><br><span>MLB - San Francisco Giants at Cincinnati Reds</span></td>
-      <td>+102</td>
-      <td>63.60%</td>
-      <td>28.48%</td>
-      <td>16.21%</td>
-      <td>270</td>
+      <td><strong>Under 9.5</strong><br><span>MLB - San Francisco Giants at Cincinnati Reds</span></td>
+      <td>-115</td>
+      <td>67.45%</td>
+      <td>26.09%</td>
+      <td>16.36%</td>
+      <td>263</td>
       <td class="positive">Qualified</td>
     </tr>
     
@@ -642,23 +642,23 @@
     
 
     <tr>
+      <td><strong>Milwaukee Brewers moneyline</strong><br><span>MLB - Toronto Blue Jays at Milwaukee Brewers</span></td>
+      <td>-122</td>
+      <td>67.68%</td>
+      <td>23.15%</td>
+      <td>15.07%</td>
+      <td>248</td>
+      <td class="positive">Qualified</td>
+    </tr>
+    
+
+    <tr>
       <td><strong>Over 9.5</strong><br><span>MLB - Washington Nationals at Pittsburgh Pirates</span></td>
       <td>-108</td>
       <td>64.18%</td>
       <td>23.61%</td>
       <td>14.61%</td>
       <td>245</td>
-      <td class="positive">Qualified</td>
-    </tr>
-    
-
-    <tr>
-      <td><strong>Milwaukee Brewers moneyline</strong><br><span>MLB - Toronto Blue Jays at Milwaukee Brewers</span></td>
-      <td>-126</td>
-      <td>67.97%</td>
-      <td>21.92%</td>
-      <td>14.76%</td>
-      <td>242</td>
       <td class="positive">Qualified</td>
     </tr>
     
@@ -678,7 +678,7 @@
     </section>
 
     <p class="footer">
-      Generated at 2026-04-14 10:37 AM. Settings come from edge_model_config.json. Settled bankroll state comes from tracking/bet_results.csv. Official model performance comes from tracking/model_results.csv.
+      Generated at 2026-04-14 11:41 AM. Settings come from edge_model_config.json. Settled bankroll state comes from tracking/bet_results.csv. Official model performance comes from tracking/model_results.csv.
     </p>
   </main>
 </body>

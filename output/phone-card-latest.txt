@@ -35,13 +35,13 @@ TODAY'S OFFICIAL CARD
 
 WATCHLIST
 
-1. UCL - Atlético Madrid moneyline @ +285
-   True 40.74% | EV 56.84% | Edge 8.88%
-2. NHL - Boston Bruins -1.5 @ +190
-   True 41.96% | EV 21.70% | Edge 8.86%
-3. UCL - Under 3.5 @ -110
+1. UCL - Atlético Madrid moneyline @ +275
+   True 41.10% | EV 54.12% | Edge 8.67%
+2. UCL - Under 3.5 @ -110
    True 60.95% | EV 16.35% | Edge 11.47%
-4. UCL - Under 3.5 @ -130
-   True 63.22% | EV 11.86% | Edge 10.16%
-5. NBA - Miami Heat moneyline @ +195
+3. UCL - Under 3.5 @ -125
+   True 62.95% | EV 13.31% | Edge 10.32%
+4. NBA - Miami Heat moneyline @ +195
    True 37.97% | EV 12.01% | Edge 5.47%
+5. NHL - Montreal Canadiens moneyline @ -205
+   True 70.15% | EV 4.37% | Edge 5.67%
