@@ -32,11 +32,9 @@ jobs:
         python generate_daily_card.py --skip-provider-sync
         
     - name: Commit and push output files
-      env:
-        GH_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add output/daily-card-*.html output/phone-card-*.html output/daily-card-*.json output/daily-candidates-*.json output/model-performance-*.json tracking/model_results.csv
         git diff --quiet && git diff --staged --quiet || git commit -m "Update daily card - $(date +%Y-%m-%d)"
-        git push
+        git push https://${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
