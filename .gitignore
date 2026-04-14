@@ -15,11 +15,12 @@ build/
 venv/
 ENV/
 env/
-output/*.json
-output/*.html
-output/*.md
-output/*.txt
-tracking/*.csv
+# Keep output files for GitHub Pages serving
+# output/*.json
+# output/*.html
+# output/*.md
+# output/*.txt
+# tracking/*.csv
 data/*.pkl
 data/*.json
 *.log
