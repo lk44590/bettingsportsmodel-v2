@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Daily Card - Latest</title>
+  <style>
+    :root {
+      --bg: #f4ecdd;
+      --paper: #fffaf1;
+      --ink: #192218;
+      --muted: #667265;
+      --green: #25523a;
+      --gold: #b6822f;
+      --line: rgba(25, 34, 24, 0.12);
+      --shadow: 0 14px 28px rgba(60, 44, 15, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(180deg, #f8f2e7, var(--bg));
+      color: var(--ink);
+    }
+    main {
+      width: min(100%, 560px);
+      margin: 0 auto;
+      padding: 14px 12px 30px;
+    }
+    .hero, .panel, .pick, .watch, .phone-empty, .phone-watch-empty {
+      background: rgba(255, 250, 241, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+    .hero {
+      padding: 18px 16px;
+      margin-bottom: 14px;
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    h1 {
+      margin: 0;
+      font-size: 38px;
+      line-height: 0.92;
+    }
+    .hero p {
+      margin: 10px 0 0;
+      line-height: 1.55;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .mini {
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(37, 82, 58, 0.06);
+    }
+    .mini span {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .mini strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 18px;
+    }
+    .section-title {
+      margin: 18px 4px 10px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .pick, .watch {
+      padding: 16px 14px;
+      margin-bottom: 12px;
+    }
+    .rank {
+      display: inline-block;
+      min-width: 32px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(182,130,47,0.18);
+      color: var(--green);
+      font-weight: 700;
+      font-size: 12px;
+      text-align: center;
+    }
+    .sport {
+      margin: 12px 0 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--green);
+      font-weight: 700;
+    }
+    .event {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.05;
+    }
+    .bet {
+      margin: 10px 0 12px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .reason {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    .panel {
+      padding: 14px 16px;
+      margin-top: 16px;
+    }
+    .status {
+      color: var(--green);
+      font-weight: 700;
+    }
+    .foot {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Phone Daily Card</p>
+      <h1>Edge Ledger</h1>
+      <p>Latest betting picks updated daily at 10:00 AM Eastern.</p>
+      <div class="grid">
+        <div class="mini"><span>Date</span><strong id="date">Loading...</strong></div>
+        <div class="mini"><span>Status</span><strong>Active</strong></div>
+      </div>
+    </section>
+
+    <div class="section-title">Today's Official Card</div>
+    <div id="picks-container">
+      <article class="pick">
+        <p style="text-align: center; padding: 20px;">Loading picks...</p>
+      </article>
+    </div>
+
+    <script>
+      // Auto-redirect to today's card or load from JSON
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('date').textContent = today;
+      
+      // Try to load from the dated file, fallback to message
+      fetch(`output/daily-card-${today}.json`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.shortlist && data.shortlist.length > 0) {
+            const container = document.getElementById('picks-container');
+            container.innerHTML = data.shortlist.map((pick, i) => `
+              <article class="pick">
+                <div class="rank">#${i+1}</div>
+                <p class="sport">${pick.sport}</p>
+                <h2 class="event">${pick.event}</h2>
+                <p class="bet">${pick.selection} @ ${pick.odds}</p>
+                <div class="grid">
+                  <div class="mini"><span>True</span><strong>${(pick.trueProbability*100).toFixed(1)}%</strong></div>
+                  <div class="mini"><span>EV</span><strong>${pick.ev}%</strong></div>
+                  <div class="mini"><span>Stake</span><strong>$${pick.stake}</strong></div>
+                  <div class="mini"><span>Edge</span><strong>${pick.edge}%</strong></div>
+                </div>
+              </article>
+            `).join('');
+          }
+        })
+        .catch(() => {
+          document.getElementById('picks-container').innerHTML = `
+            <article class="pick">
+              <p style="text-align: center; padding: 20px;">
+                Visit <a href="output/daily-card-${today}.html">daily-card-${today}.html</a> for today's picks.
+              </p>
+            </article>
+          `;
+        });
+    </script>
+
+    <p class="foot">Updated daily at 10:00 AM Eastern. Refresh to see latest picks.</p>
+  </main>
+</body>
+</html>

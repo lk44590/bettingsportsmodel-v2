@@ -36,11 +36,12 @@ jobs:
       run: |
         cp output/daily-card-*.html output/latest.html
         cp output/phone-card-*.html output/latest-phone.html
+        cp output/phone-card-*.html index.html
         
     - name: Commit and push output files
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add output/daily-card-*.html output/phone-card-*.html output/daily-card-*.json output/daily-candidates-*.json output/model-performance-*.json output/latest.html output/latest-phone.html tracking/model_results.csv
+        git add output/daily-card-*.html output/phone-card-*.html output/daily-card-*.json output/daily-candidates-*.json output/model-performance-*.json output/latest.html output/latest-phone.html index.html tracking/model_results.csv
         git diff --quiet && git diff --staged --quiet || git commit -m "Update daily card - $(date +%Y-%m-%d)"
         git push origin main
