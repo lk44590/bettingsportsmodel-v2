@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-04-08 13:32:42",
+  "start_date": "2026-03-09",
+  "end_date": "2026-04-07",
+  "processed_days": 30,
+  "days_with_official_picks": 0,
+  "new_picks_added": 0,
+  "restore_latest": "2026-04-08",
+  "model_performance": {
+    "settled_bets": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "staked": 0,
+    "profit": 0,
+    "roi_pct": 0.0,
+    "hit_rate_pct": 0.0,
+    "avg_clv_pct": 0.0,
+    "avg_ev_pct": 0.0,
+    "total_bets": 0,
+    "open_bets": 0,
+    "by_sport": [],
+    "by_market": []
+  }
+}

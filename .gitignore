@@ -15,6 +15,8 @@ build/
 venv/
 ENV/
 env/
+# Archive old output files
+output/archive/
 # Keep output files for GitHub Pages serving
 # output/*.json
 # output/*.html

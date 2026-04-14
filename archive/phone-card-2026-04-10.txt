@@ -1,0 +1,65 @@
+EDGE LEDGER PHONE CARD - 2026-04-10
+
+Official picks: 6
+Bankroll (model_results): $1076.44
+Model ROI: 84.14%
+Settled picks: 6
+Open picks: 6
+Provider synced: No
+
+Provider notes: Provider quota exhausted before odds sync completed.
+
+Provider-safe mode: public-board model only, no hard pick cap.
+No-provider mode tightened the card to EV >= 5.25%, edge >= 4.00%, true probability >= 40.00%, quality >= 62, and daily risk cap <= 10.00%.
+No-provider mode blocks official picks above +175 unless live provider support is available.
+
+TODAY'S OFFICIAL CARD
+
+1. MLB - Arizona Diamondbacks at Philadelphia Phillies
+   Arizona Diamondbacks moneyline @ +153
+   True 44.69% | EV 13.06% | Stake $20.31
+   Max odds +124
+   Auto model leans Arizona Diamondbacks on win rate, venue split, and core team strength.
+
+2. MLB - Colorado Rockies at San Diego Padres
+   Colorado Rockies moneyline @ +148
+   True 45.43% | EV 12.67% | Stake $20.36
+   Max odds +120
+   Auto model leans Colorado Rockies on win rate, venue split, and core team strength.
+
+3. NBA - Memphis Grizzlies at Utah Jazz
+   Under 248.5 @ -110
+   True 55.49% | EV 5.94% | Stake $15.55
+   Max odds -125
+   Auto total projection: 229.83 vs market 248.5.
+
+4. MLB - Minnesota Twins at Toronto Blue Jays
+   Minnesota Twins moneyline @ +129
+   True 48.12% | EV 10.20% | Stake $18.81
+   Max odds +108
+   Auto model leans Minnesota Twins on win rate, venue split, and core team strength.
+
+5. MLB - Los Angeles Angels at Cincinnati Reds
+   Under 8.5 @ +102
+   True 53.01% | EV 7.08% | Stake $16.53
+   Max odds -113
+   Auto total projection: 6.21 vs market 8.5.
+
+6. MLB - Washington Nationals at Milwaukee Brewers
+   Over 8.5 @ -105
+   True 54.52% | EV 6.44% | Stake $16.08
+   Max odds -120
+   Auto total projection: 11.21 vs market 8.5.
+
+WATCHLIST
+
+1. NBA - Oklahoma City Thunder moneyline @ +390
+   True 25.50% | EV 24.94% | Edge 5.93%
+2. NBA - Minnesota Timberwolves moneyline @ +380
+   True 24.75% | EV 18.81% | Edge 4.75%
+3. NBA - Detroit Pistons moneyline @ +180
+   True 39.06% | EV 9.38% | Edge 4.81%
+4. NBA - Cleveland Cavaliers moneyline @ +280
+   True 30.22% | EV 14.85% | Edge 5.00%
+5. NBA - Chicago Bulls +15.5 @ -108
+   True 54.48% | EV 4.93% | Edge 4.91%

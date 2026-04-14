@@ -1,0 +1,41 @@
+[
+  {
+    "date": "2026-04-14",
+    "sport": "NHL",
+    "event": "Colorado Avalanche at Calgary Flames",
+    "bet_type": "Colorado Avalanche -1.5",
+    "odds": "+160",
+    "implied_probability": "38.46%",
+    "true_probability": "58.63%",
+    "ev": "52.44%",
+    "edge_score": "98",
+    "stake": "$35.23",
+    "max_odds": "-142"
+  },
+  {
+    "date": "2026-04-14",
+    "sport": "MLB",
+    "event": "Boston Red Sox at Minnesota Twins",
+    "bet_type": "Minnesota Twins moneyline",
+    "odds": "+113",
+    "implied_probability": "46.95%",
+    "true_probability": "60.64%",
+    "ev": "29.17%",
+    "edge_score": "78",
+    "stake": "$35.23",
+    "max_odds": "-154"
+  },
+  {
+    "date": "2026-04-14",
+    "sport": "NBA",
+    "event": "Portland Trail Blazers at Phoenix Suns",
+    "bet_type": "Over 216.5",
+    "odds": "-115",
+    "implied_probability": "53.49%",
+    "true_probability": "62.76%",
+    "ev": "17.33%",
+    "edge_score": "100",
+    "stake": "$35.11",
+    "max_odds": "-169"
+  }
+]

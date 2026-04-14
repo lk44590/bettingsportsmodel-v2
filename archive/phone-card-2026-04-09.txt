@@ -1,0 +1,53 @@
+EDGE LEDGER PHONE CARD - 2026-04-09
+
+Official picks: 4
+Bankroll (model_results): $1020.31
+Model ROI: 169.96%
+Settled picks: 1
+Open picks: 4
+Provider synced: No
+
+Provider notes: Provider quota exhausted before odds sync completed.
+
+Provider-safe mode: public-board model only, no hard pick cap.
+No-provider mode tightened the card to EV >= 5.25%, edge >= 4.00%, true probability >= 40.00%, quality >= 62, and daily risk cap <= 10.00%.
+No-provider mode blocks official picks above +175 unless live provider support is available.
+
+TODAY'S OFFICIAL CARD
+
+1. NBA - Chicago Bulls at Washington Wizards
+   Under 247.5 @ -105
+   True 54.87% | EV 7.12% | Stake $19.08
+   Max odds -122
+   Auto total projection: 228.04 vs market 247.5.
+
+2. NHL - Carolina Hurricanes at Chicago Blackhawks
+   Carolina Hurricanes -1.5 @ +120
+   True 49.20% | EV 8.23% | Stake $17.50
+   Max odds +103
+   Auto projected margin: -2.92 vs market +1.5.
+
+3. NHL - Calgary Flames at Colorado Avalanche
+   Colorado Avalanche -1.5 @ -120
+   True 57.46% | EV 5.34% | Stake $16.35
+   Max odds -135
+   Auto projected margin: 4.08 vs market -1.5.
+
+4. NBA - Los Angeles Lakers at Golden State Warriors
+   Los Angeles Lakers moneyline @ +160
+   True 41.18% | EV 7.07% | Stake $11.27
+   Max odds +143
+   Auto model leans Los Angeles Lakers on win rate, venue split, and core team strength.
+
+WATCHLIST
+
+1. NHL - Pittsburgh Penguins -1.5 @ +225
+   True 34.01% | EV 10.54% | Edge 4.52%
+2. NHL - Pittsburgh Penguins moneyline @ -112
+   True 54.67% | EV 3.48% | Edge 4.24%
+3. NHL - Buffalo Sabres moneyline @ -125
+   True 57.14% | EV 2.86% | Edge 3.90%
+4. NBA - Over 216.5 @ -110
+   True 54.01% | EV 3.11% | Edge 4.01%
+5. MLB - Over 8.0 @ -115
+   True 55.96% | EV 4.63% | Edge 4.88%

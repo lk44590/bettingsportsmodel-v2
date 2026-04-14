@@ -1,0 +1,80 @@
+[
+  {
+    "date": "2026-04-13",
+    "sport": "NHL",
+    "event": "Minnesota Wild at St. Louis Blues",
+    "bet_type": "Minnesota Wild moneyline",
+    "odds": "+154",
+    "implied_probability": "39.37%",
+    "true_probability": "44.79%",
+    "ev": "13.77%",
+    "edge_score": "99",
+    "stake": "$21.24",
+    "max_odds": "+123"
+  },
+  {
+    "date": "2026-04-13",
+    "sport": "NHL",
+    "event": "Carolina Hurricanes at Philadelphia Flyers",
+    "bet_type": "Carolina Hurricanes moneyline",
+    "odds": "+136",
+    "implied_probability": "42.37%",
+    "true_probability": "47.66%",
+    "ev": "12.48%",
+    "edge_score": "100",
+    "stake": "$21.81",
+    "max_odds": "+110"
+  },
+  {
+    "date": "2026-04-13",
+    "sport": "MLB",
+    "event": "Washington Nationals at Pittsburgh Pirates",
+    "bet_type": "Over 7.5",
+    "odds": "-102",
+    "implied_probability": "50.50%",
+    "true_probability": "53.55%",
+    "ev": "6.04%",
+    "edge_score": "74",
+    "stake": "$14.64",
+    "max_odds": "-115"
+  },
+  {
+    "date": "2026-04-13",
+    "sport": "NHL",
+    "event": "Buffalo Sabres at Chicago Blackhawks",
+    "bet_type": "Buffalo Sabres -1.5",
+    "odds": "+124",
+    "implied_probability": "44.64%",
+    "true_probability": "48.94%",
+    "ev": "9.62%",
+    "edge_score": "99",
+    "stake": "$18.43",
+    "max_odds": "+104"
+  },
+  {
+    "date": "2026-04-13",
+    "sport": "MLB",
+    "event": "Chicago Cubs at Philadelphia Phillies",
+    "bet_type": "Chicago Cubs moneyline",
+    "odds": "+153",
+    "implied_probability": "39.53%",
+    "true_probability": "44.30%",
+    "ev": "12.08%",
+    "edge_score": "78",
+    "stake": "$18.76",
+    "max_odds": "+126"
+  },
+  {
+    "date": "2026-04-13",
+    "sport": "MLB",
+    "event": "Boston Red Sox at Minnesota Twins",
+    "bet_type": "Minnesota Twins moneyline",
+    "odds": "+139",
+    "implied_probability": "41.84%",
+    "true_probability": "44.67%",
+    "ev": "6.75%",
+    "edge_score": "79",
+    "stake": "$11.55",
+    "max_odds": "+124"
+  }
+]

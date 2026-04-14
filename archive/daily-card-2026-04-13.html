@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Edge Card - 2026-04-13</title>
+  <style>
+    :root {
+      --bg: #f4ecdd;
+      --paper: #fffaf1;
+      --ink: #192218;
+      --muted: #687463;
+      --line: rgba(25, 34, 24, 0.1);
+      --green: #25523a;
+      --gold: #b6822f;
+      --red: #a34c39;
+      --shadow: 0 18px 42px rgba(60, 44, 15, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(182,130,47,0.16), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(37,82,58,0.12), transparent 30%),
+        linear-gradient(180deg, #f8f2e7, var(--bg));
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 18px 48px;
+    }
+    .hero {
+      background: rgba(255,250,241,0.92);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+    .eyebrow {
+      margin: 0 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 0.95;
+    }
+    .hero p {
+      margin: 0;
+      line-height: 1.6;
+      max-width: 70ch;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .hero-note {
+      margin-top: 14px !important;
+      color: var(--muted);
+      max-width: 100%;
+    }
+    .metric {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 16px;
+    }
+    .metric-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .section {
+      margin-top: 22px;
+    }
+    .section h2 {
+      margin: 0 0 10px;
+      font-size: 26px;
+    }
+    .section p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+    }
+    .pick-card, .empty-card {
+      background: rgba(255,250,241,0.92);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .pick-rank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: rgba(182,130,47,0.12);
+      color: var(--gold);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .sport {
+      margin: 0 0 6px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+    .event {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.15;
+    }
+    .bet {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .mini {
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    .mini span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .mini strong {
+      font-size: 16px;
+    }
+    .reason {
+      margin: 0;
+      line-height: 1.55;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(255,250,241,0.92);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      background: rgba(37,82,58,0.05);
+    }
+    tr:last-child td { border-bottom: none; }
+    .positive { color: var(--green); font-weight: 700; }
+    .muted-cell { color: var(--muted); text-align: center; }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+  <body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">One-Click Daily Betting Card</p>
+      <h1>Daily Edge Card</h1>
+      <p>The model scanned the configured ESPN league boards, synced the live provider feed when credentials were available, and then kept only the bets that still cleared the EV, edge, and quality filters after calibration, uncertainty cuts, bankroll discipline, and historical CLV/ROI guardrails.</p>
+      <div class="summary">
+        <div class="metric"><span class="metric-label">Date</span><div class="metric-value">2026-04-13</div></div>
+        <div class="metric"><span class="metric-label">Qualified Bets</span><div class="metric-value">6</div></div>
+        <div class="metric"><span class="metric-label">Final Picks</span><div class="metric-value">6</div></div>
+        <div class="metric"><span class="metric-label">Current Bankroll</span><div class="metric-value">$1064.21</div></div>
+        <div class="metric"><span class="metric-label">Ledger Source</span><div class="metric-value">model_results</div></div>
+        <div class="metric"><span class="metric-label">Model ROI</span><div class="metric-value">29.79%</div></div>
+        <div class="metric"><span class="metric-label">Settled Picks</span><div class="metric-value">13</div></div>
+        <div class="metric"><span class="metric-label">Open Picks</span><div class="metric-value">6</div></div>
+        <div class="metric"><span class="metric-label">Avg CLV</span><div class="metric-value">0.00%</div></div>
+        <div class="metric"><span class="metric-label">Planned Stake</span><div class="metric-value">$106.43</div></div>
+        <div class="metric"><span class="metric-label">Daily Risk Cap</span><div class="metric-value">$106.42</div></div>
+        <div class="metric"><span class="metric-label">Scaled Picks</span><div class="metric-value">6</div></div>
+        <div class="metric"><span class="metric-label">Provider Feed</span><div class="metric-value">Not synced</div></div>
+        <div class="metric"><span class="metric-label">Provider Markets</span><div class="metric-value">0</div></div>
+        <div class="metric"><span class="metric-label">Provider Events</span><div class="metric-value">0</div></div>
+        <div class="metric"><span class="metric-label">Provider</span><div class="metric-value">the_odds_api</div></div>
+        <div class="metric"><span class="metric-label">Requests Left</span><div class="metric-value">0</div></div>
+      </div>
+      <p class="hero-note">Generated 2026-04-13 04:20 PM. Provider notes: Provider quota exhausted before odds sync completed. Provider-safe mode is active, so this card is using the public-board model without a hard pick cap. No-provider mode tightened the card to EV &gt;= 5.25%, edge &gt;= 4.00%, true probability &gt;= 40.00%, quality &gt;= 62, and daily risk cap &lt;= 10.00%. No-provider mode blocks official picks above +175 unless live provider support is available.</p>
+    </section>
+
+    <section class="section">
+      <h2>Today's Card</h2>
+      <p>If there are fewer than five picks, the model is choosing discipline over forcing volume.</p>
+      <div class="cards">
+        
+    <article class="pick-card">
+      <div class="pick-rank">1</div>
+      <p class="sport">NHL</p>
+      <h3 class="event">Minnesota Wild at St. Louis Blues</h3>
+      <p class="bet">Minnesota Wild moneyline @ +154</p>
+      <div class="grid">
+        <div class="mini"><span>Implied</span><strong>39.37%</strong></div>
+        <div class="mini"><span>True</span><strong>44.79%</strong></div>
+        <div class="mini"><span>EV</span><strong>13.77%</strong></div>
+        <div class="mini"><span>Stake</span><strong>$21.24</strong></div>
+        <div class="mini"><span>Edge Score</span><strong>99</strong></div>
+        <div class="mini"><span>Max Odds</span><strong>+123</strong></div>
+      </div>
+      <p class="reason">Auto model leans Minnesota Wild on win rate, venue split, and core team strength.</p>
+    </article>
+    
+
+    <article class="pick-card">
+      <div class="pick-rank">2</div>
+      <p class="sport">NHL</p>
+      <h3 class="event">Carolina Hurricanes at Philadelphia Flyers</h3>
+      <p class="bet">Carolina Hurricanes moneyline @ +136</p>
+      <div class="grid">
+        <div class="mini"><span>Implied</span><strong>42.37%</strong></div>
+        <div class="mini"><span>True</span><strong>47.66%</strong></div>
+        <div class="mini"><span>EV</span><strong>12.48%</strong></div>
+        <div class="mini"><span>Stake</span><strong>$21.81</strong></div>
+        <div class="mini"><span>Edge Score</span><strong>100</strong></div>
+        <div class="mini"><span>Max Odds</span><strong>+110</strong></div>
+      </div>
+      <p class="reason">Auto model leans Carolina Hurricanes on win rate, venue split, and core team strength.</p>
+    </article>
+    
+
+    <article class="pick-card">
+      <div class="pick-rank">3</div>
+      <p class="sport">MLB</p>
+      <h3 class="event">Washington Nationals at Pittsburgh Pirates</h3>
+      <p class="bet">Over 7.5 @ -102</p>
+      <div class="grid">
+        <div class="mini"><span>Implied</span><strong>50.50%</strong></div>
+        <div class="mini"><span>True</span><strong>53.55%</strong></div>
+        <div class="mini"><span>EV</span><strong>6.04%</strong></div>
+        <div class="mini"><span>Stake</span><strong>$14.64</strong></div>
+        <div class="mini"><span>Edge Score</span><strong>74</strong></div>
+        <div class="mini"><span>Max Odds</span><strong>-115</strong></div>
+      </div>
+      <p class="reason">Auto total projection: 9.62 vs market 7.5.</p>
+    </article>
+    
+
+    <article class="pick-card">
+      <div class="pick-rank">4</div>
+      <p class="sport">NHL</p>
+      <h3 class="event">Buffalo Sabres at Chicago Blackhawks</h3>
+      <p class="bet">Buffalo Sabres -1.5 @ +124</p>
+      <div class="grid">
+        <div class="mini"><span>Implied</span><strong>44.64%</strong></div>
+        <div class="mini"><span>True</span><strong>48.94%</strong></div>
+        <div class="mini"><span>EV</span><strong>9.62%</strong></div>
+        <div class="mini"><span>Stake</span><strong>$18.43</strong></div>
+        <div class="mini"><span>Edge Score</span><strong>99</strong></div>
+        <div class="mini"><span>Max Odds</span><strong>+104</strong></div>
+      </div>
+      <p class="reason">Auto projected margin: -3.04 vs market +1.5.</p>
+    </article>
+    
+
+    <article class="pick-card">
+      <div class="pick-rank">5</div>
+      <p class="sport">MLB</p>
+      <h3 class="event">Chicago Cubs at Philadelphia Phillies</h3>
+      <p class="bet">Chicago Cubs moneyline @ +153</p>
+      <div class="grid">
+        <div class="mini"><span>Implied</span><strong>39.53%</strong></div>
+        <div class="mini"><span>True</span><strong>44.30%</strong></div>
+        <div class="mini"><span>EV</span><strong>12.08%</strong></div>
+        <div class="mini"><span>Stake</span><strong>$18.76</strong></div>
+        <div class="mini"><span>Edge Score</span><strong>78</strong></div>
+        <div class="mini"><span>Max Odds</span><strong>+126</strong></div>
+      </div>
+      <p class="reason">Auto model leans Chicago Cubs on win rate, venue split, and core team strength.</p>
+    </article>
+    
+
+    <article class="pick-card">
+      <div class="pick-rank">6</div>
+      <p class="sport">MLB</p>
+      <h3 class="event">Boston Red Sox at Minnesota Twins</h3>
+      <p class="bet">Minnesota Twins moneyline @ +139</p>
+      <div class="grid">
+        <div class="mini"><span>Implied</span><strong>41.84%</strong></div>
+        <div class="mini"><span>True</span><strong>44.67%</strong></div>
+        <div class="mini"><span>EV</span><strong>6.75%</strong></div>
+        <div class="mini"><span>Stake</span><strong>$11.55</strong></div>
+        <div class="mini"><span>Edge Score</span><strong>79</strong></div>
+        <div class="mini"><span>Max Odds</span><strong>+124</strong></div>
+      </div>
+      <p class="reason">Auto model leans Minnesota Twins on win rate, venue split, and core team strength.</p>
+    </article>
+    
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Model Track Record</h2>
+      <p>The system now auto-settles official game-line picks from ESPN finals and keeps an always-on performance ledger for inspection.</p>
+      <div class="cards">
+        <article class="pick-card">
+          <p class="sport">Overall</p>
+          <h3 class="event">Official Picks</h3>
+          <div class="grid">
+            <div class="mini"><span>Profit</span><strong>$64.21</strong></div>
+            <div class="mini"><span>ROI</span><strong>29.79%</strong></div>
+            <div class="mini"><span>Hit Rate</span><strong>61.54%</strong></div>
+            <div class="mini"><span>Avg EV</span><strong>8.18%</strong></div>
+            <div class="mini"><span>Wins-Losses</span><strong>8-5</strong></div>
+            <div class="mini"><span>Pushes</span><strong>0</strong></div>
+          </div>
+          <p class="reason">Tracked from <code>tracking/model_results.csv</code> and updated automatically when final scores are available.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Performance Breakdown</h2>
+      <p>Breakdowns make it easier to see whether a specific sport or market type is dragging down long-term results.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Sport</th>
+            <th>Bets</th>
+            <th>ROI %</th>
+            <th>Profit</th>
+            <th>Avg CLV %</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td><strong>MLB</strong></td>
+      <td>5</td>
+      <td>-10.12%</td>
+      <td>$-9.32</td>
+      <td>0.00%</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>NBA</strong></td>
+      <td>3</td>
+      <td>109.67%</td>
+      <td>$50.34</td>
+      <td>0.00%</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>NHL</strong></td>
+      <td>3</td>
+      <td>119.96%</td>
+      <td>$54.94</td>
+      <td>0.00%</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>EPL</strong></td>
+      <td>2</td>
+      <td>-100.00%</td>
+      <td>$-31.75</td>
+      <td>0.00%</td>
+    </tr>
+    
+        </tbody>
+      </table>
+      <div style="height: 14px;"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Market</th>
+            <th>Bets</th>
+            <th>ROI %</th>
+            <th>Profit</th>
+            <th>Avg CLV %</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td><strong>total</strong></td>
+      <td>6</td>
+      <td>-0.67%</td>
+      <td>$-0.66</td>
+      <td>0.00%</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>moneyline</strong></td>
+      <td>4</td>
+      <td>14.04%</td>
+      <td>$9.93</td>
+      <td>0.00%</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>spread</strong></td>
+      <td>3</td>
+      <td>119.96%</td>
+      <td>$54.94</td>
+      <td>0.00%</td>
+    </tr>
+    
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Filter Diagnostics</h2>
+      <p>When the board is empty, this shows the most common reasons candidates were rejected.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Filter Reason</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td><strong>EV below floor</strong></td>
+      <td>88</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Edge below floor</strong></td>
+      <td>86</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>True probability below floor</strong></td>
+      <td>22</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Positive odds above no-provider cap (+175)</strong></td>
+      <td>2</td>
+    </tr>
+    
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Closest Near Misses</h2>
+      <p>These are not official bets. They were the strongest filtered candidates that still carried some positive edge after the new safety checks.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Bet</th>
+            <th>Odds</th>
+            <th>True %</th>
+            <th>EV %</th>
+            <th>Edge %</th>
+            <th>Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td><strong>Colorado Avalanche -1.5</strong><br><span>NHL - Colorado Avalanche at Edmonton Oilers</span></td>
+      <td>+195</td>
+      <td>36.87%</td>
+      <td>8.75%</td>
+      <td>4.68%</td>
+      <td>99</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Colorado Avalanche moneyline</strong><br><span>NHL - Colorado Avalanche at Edmonton Oilers</span></td>
+      <td>-125</td>
+      <td>57.21%</td>
+      <td>2.97%</td>
+      <td>3.96%</td>
+      <td>95</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Over 5.5</strong><br><span>NHL - Winnipeg Jets at Vegas Golden Knights</span></td>
+      <td>-130</td>
+      <td>57.72%</td>
+      <td>2.12%</td>
+      <td>3.44%</td>
+      <td>92</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Over 5.5</strong><br><span>NHL - Carolina Hurricanes at Philadelphia Flyers</span></td>
+      <td>-130</td>
+      <td>57.76%</td>
+      <td>2.19%</td>
+      <td>3.48%</td>
+      <td>92</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Washington Nationals moneyline</strong><br><span>MLB - Washington Nationals at Pittsburgh Pirates</span></td>
+      <td>+189</td>
+      <td>37.22%</td>
+      <td>7.56%</td>
+      <td>4.10%</td>
+      <td>89</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <h2>Next Best Candidates</h2>
+      <p>This is the top of the full ranked board, including bets that may have failed the final qualification rules.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Bet</th>
+            <th>Odds</th>
+            <th>True %</th>
+            <th>EV %</th>
+            <th>Edge %</th>
+            <th>Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+    <tr>
+      <td><strong>Minnesota Wild moneyline</strong><br><span>NHL - Minnesota Wild at St. Louis Blues</span></td>
+      <td>+154</td>
+      <td>44.79%</td>
+      <td>13.77%</td>
+      <td>7.04%</td>
+      <td>131</td>
+      <td class="positive">Qualified</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Carolina Hurricanes moneyline</strong><br><span>NHL - Carolina Hurricanes at Philadelphia Flyers</span></td>
+      <td>+136</td>
+      <td>47.66%</td>
+      <td>12.48%</td>
+      <td>7.00%</td>
+      <td>129</td>
+      <td class="positive">Qualified</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Buffalo Sabres -1.5</strong><br><span>NHL - Buffalo Sabres at Chicago Blackhawks</span></td>
+      <td>+124</td>
+      <td>48.94%</td>
+      <td>9.62%</td>
+      <td>6.14%</td>
+      <td>118</td>
+      <td class="positive">Qualified</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Chicago Cubs moneyline</strong><br><span>MLB - Chicago Cubs at Philadelphia Phillies</span></td>
+      <td>+153</td>
+      <td>44.30%</td>
+      <td>12.08%</td>
+      <td>6.50%</td>
+      <td>116</td>
+      <td class="positive">Qualified</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Colorado Avalanche -1.5</strong><br><span>NHL - Colorado Avalanche at Edmonton Oilers</span></td>
+      <td>+195</td>
+      <td>36.87%</td>
+      <td>8.75%</td>
+      <td>4.68%</td>
+      <td>99</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Over 7.5</strong><br><span>MLB - Washington Nationals at Pittsburgh Pirates</span></td>
+      <td>-102</td>
+      <td>53.55%</td>
+      <td>6.04%</td>
+      <td>5.28%</td>
+      <td>98</td>
+      <td class="positive">Qualified</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Colorado Avalanche moneyline</strong><br><span>NHL - Colorado Avalanche at Edmonton Oilers</span></td>
+      <td>-125</td>
+      <td>57.21%</td>
+      <td>2.97%</td>
+      <td>3.96%</td>
+      <td>95</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Minnesota Twins moneyline</strong><br><span>MLB - Boston Red Sox at Minnesota Twins</span></td>
+      <td>+139</td>
+      <td>44.67%</td>
+      <td>6.75%</td>
+      <td>4.64%</td>
+      <td>94</td>
+      <td class="positive">Qualified</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Over 5.5</strong><br><span>NHL - Winnipeg Jets at Vegas Golden Knights</span></td>
+      <td>-130</td>
+      <td>57.72%</td>
+      <td>2.12%</td>
+      <td>3.44%</td>
+      <td>92</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Over 5.5</strong><br><span>NHL - Carolina Hurricanes at Philadelphia Flyers</span></td>
+      <td>-130</td>
+      <td>57.76%</td>
+      <td>2.19%</td>
+      <td>3.48%</td>
+      <td>92</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Washington Nationals moneyline</strong><br><span>MLB - Washington Nationals at Pittsburgh Pirates</span></td>
+      <td>+189</td>
+      <td>37.22%</td>
+      <td>7.56%</td>
+      <td>4.10%</td>
+      <td>89</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+
+    <tr>
+      <td><strong>Under 8.5</strong><br><span>MLB - Chicago Cubs at Philadelphia Phillies</span></td>
+      <td>-115</td>
+      <td>55.48%</td>
+      <td>3.73%</td>
+      <td>4.40%</td>
+      <td>89</td>
+      <td class="">Filtered</td>
+    </tr>
+    
+        </tbody>
+      </table>
+    </section>
+
+    <p class="footer">
+      Generated at 2026-04-13 04:20 PM. Settings come from edge_model_config.json. Settled bankroll state comes from tracking/bet_results.csv. Official model performance comes from tracking/model_results.csv.
+    </p>
+  </main>
+</body>
+</html>

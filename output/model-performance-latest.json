@@ -1,0 +1,74 @@
+{
+  "settled_bets": 19,
+  "wins": 11,
+  "losses": 8,
+  "pushes": 0,
+  "staked": 321.97,
+  "profit": 55.65,
+  "roi_pct": 17.28,
+  "hit_rate_pct": 57.89,
+  "avg_clv_pct": 0.0,
+  "avg_ev_pct": 8.79,
+  "total_bets": 22,
+  "open_bets": 3,
+  "by_sport": [
+    {
+      "label": "MLB",
+      "bets": 8,
+      "roi_pct": 1.69,
+      "profit": 2.32,
+      "avg_clv_pct": 0.0,
+      "hit_rate_pct": 50.0
+    },
+    {
+      "label": "NHL",
+      "bets": 6,
+      "roi_pct": 32.38,
+      "profit": 34.74,
+      "avg_clv_pct": 0.0,
+      "hit_rate_pct": 66.67
+    },
+    {
+      "label": "NBA",
+      "bets": 3,
+      "roi_pct": 109.67,
+      "profit": 50.34,
+      "avg_clv_pct": 0.0,
+      "hit_rate_pct": 100.0
+    },
+    {
+      "label": "EPL",
+      "bets": 2,
+      "roi_pct": -100.0,
+      "profit": -31.75,
+      "avg_clv_pct": 0.0,
+      "hit_rate_pct": 0.0
+    }
+  ],
+  "by_market": [
+    {
+      "label": "moneyline",
+      "bets": 8,
+      "roi_pct": -24.86,
+      "profit": -35.83,
+      "avg_clv_pct": 0.0,
+      "hit_rate_pct": 37.5
+    },
+    {
+      "label": "total",
+      "bets": 7,
+      "roi_pct": 12.05,
+      "profit": 13.69,
+      "avg_clv_pct": 0.0,
+      "hit_rate_pct": 57.14
+    },
+    {
+      "label": "spread",
+      "bets": 4,
+      "roi_pct": 121.11,
+      "profit": 77.79,
+      "avg_clv_pct": 0.0,
+      "hit_rate_pct": 100.0
+    }
+  ]
+}
