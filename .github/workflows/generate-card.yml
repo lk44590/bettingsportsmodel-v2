@@ -27,10 +27,9 @@ jobs:
         pip install pandas numpy scikit-learn requests joblib
         
     - name: Generate daily card
+      working-directory: ./
       run: |
-        python generate_daily_card.py
-      env:
-        THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+        python generate_daily_card.py --skip-provider-sync
         
     - name: Commit and push output files
       run: |
