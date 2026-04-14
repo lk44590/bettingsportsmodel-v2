@@ -9,6 +9,8 @@ on:
 jobs:
   generate-card:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
     - name: Checkout repository
@@ -28,3 +30,9 @@ jobs:
       working-directory: ./
       run: |
         python generate_daily_card.py --skip-provider-sync
+        
+    - name: Upload output files as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: daily-card
+        path: output/
