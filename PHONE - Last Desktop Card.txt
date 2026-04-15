@@ -1,13 +1,13 @@
-EDGE LEDGER PHONE CARD - 2026-04-14
+EDGE LEDGER PHONE CARD - 2026-04-15
 
 Official picks: 3
-Bankroll (model_results): $1055.65
-Model ROI: 17.28%
-Settled picks: 19
+Bankroll (model_results): $1182.36
+Model ROI: 42.65%
+Settled picks: 22
 Open picks: 3
 Provider synced: No
 
-Provider notes: Provider quota exhausted before odds sync completed.
+Provider notes: Provider sync skipped by CLI flag.
 
 Provider-safe mode: public-board model only, no hard pick cap.
 No-provider mode tightened the card to EV >= 5.25%, edge >= 4.00%, true probability >= 40.00%, quality >= 62, and daily risk cap <= 10.00%.
@@ -15,33 +15,33 @@ No-provider mode blocks official picks above +175 unless live provider support i
 
 TODAY'S OFFICIAL CARD
 
-1. NHL - Colorado Avalanche at Calgary Flames
-   Colorado Avalanche -1.5 @ +160
-   True 58.63% | EV 52.44% | Stake $35.23
-   Max odds -142
-   Auto projected margin: -3.92 vs market +1.5.
+1. NHL - New York Rangers at Tampa Bay Lightning
+   Tampa Bay Lightning -1.5 @ +154
+   True 49.03% | EV 24.53% | Stake $35.04
+   Max odds +104
+   Auto projected margin: 2.09 vs market -1.5.
 
-2. MLB - Boston Red Sox at Minnesota Twins
-   Minnesota Twins moneyline @ +113
-   True 60.64% | EV 29.17% | Stake $35.23
-   Max odds -154
-   Auto model leans Minnesota Twins on win rate, venue split, and core team strength.
+2. MLB - San Francisco Giants at Cincinnati Reds
+   Under 9.0 @ -110
+   True 61.59% | EV 17.58% | Stake $11.71
+   Max odds -160
+   Auto total projection: 6.41 vs market 9.0.
 
-3. NBA - Portland Trail Blazers at Phoenix Suns
-   Over 216.5 @ -115
-   True 62.76% | EV 17.33% | Stake $35.11
-   Max odds -169
-   Auto total projection: 227.42 vs market 216.5.
+3. MLB - Washington Nationals at Pittsburgh Pirates
+   Over 9.5 @ +100
+   True 58.41% | EV 16.82% | Stake $10.19
+   Max odds -140
+   Auto total projection: 11.23 vs market 9.5.
 
 WATCHLIST
 
-1. UCL - Atlético Madrid moneyline @ +275
-   True 41.10% | EV 54.12% | Edge 8.67%
-2. UCL - Under 3.5 @ -110
-   True 60.95% | EV 16.35% | Edge 11.47%
-3. UCL - Under 3.5 @ -125
-   True 62.95% | EV 13.31% | Edge 10.32%
-4. NBA - Miami Heat moneyline @ +195
-   True 37.97% | EV 12.01% | Edge 5.47%
-5. NHL - Montreal Canadiens moneyline @ -205
-   True 70.15% | EV 4.37% | Edge 5.67%
+1. UCL - Sporting CP moneyline @ +500
+   True 27.46% | EV 64.78% | Edge 6.87%
+2. UCL - Real Madrid moneyline @ +340
+   True 31.13% | EV 36.96% | Edge 5.01%
+3. NHL - Buffalo Sabres +1.5 @ -218
+   True 71.32% | EV 4.03% | Edge 5.57%
+4. NHL - Tampa Bay Lightning moneyline @ -162
+   True 64.55% | EV 4.40% | Edge 5.21%
+5. NHL - Florida Panthers +1.5 @ -198
+   True 68.83% | EV 3.60% | Edge 5.14%

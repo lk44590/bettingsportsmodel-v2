@@ -1,8 +1,0 @@
-[build]
-  command = "python generate_daily_card.py --skip-provider-sync"
-  publish = "output"
-
-[[redirects]]
-  from = "/"
-  to = "/daily-card-latest.html"
-  status = 200

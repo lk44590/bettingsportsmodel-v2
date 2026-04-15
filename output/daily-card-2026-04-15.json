@@ -1,41 +1,41 @@
 [
   {
     "date": "2026-04-15",
-    "sport": "MLB",
-    "event": "Boston Red Sox at Minnesota Twins",
-    "bet_type": "Minnesota Twins moneyline",
-    "odds": "+109",
-    "implied_probability": "47.85%",
-    "true_probability": "64.78%",
-    "ev": "35.38%",
-    "edge_score": "76",
-    "stake": "$44.68",
-    "max_odds": "-184"
-  },
-  {
-    "date": "2026-04-15",
     "sport": "NHL",
     "event": "New York Rangers at Tampa Bay Lightning",
-    "bet_type": "Tampa Bay Lightning moneyline",
-    "odds": "-125",
-    "implied_probability": "55.56%",
-    "true_probability": "69.88%",
-    "ev": "25.78%",
-    "edge_score": "98",
-    "stake": "$44.68",
-    "max_odds": "-232"
+    "bet_type": "Tampa Bay Lightning -1.5",
+    "odds": "+154",
+    "implied_probability": "39.37%",
+    "true_probability": "49.03%",
+    "ev": "24.53%",
+    "edge_score": "100",
+    "stake": "$35.04",
+    "max_odds": "+104"
   },
   {
     "date": "2026-04-15",
-    "sport": "NBA",
-    "event": "Orlando Magic at Philadelphia 76ers",
-    "bet_type": "Over 222.5",
+    "sport": "MLB",
+    "event": "San Francisco Giants at Cincinnati Reds",
+    "bet_type": "Under 9.0",
     "odds": "-110",
     "implied_probability": "52.38%",
-    "true_probability": "58.54%",
-    "ev": "11.75%",
-    "edge_score": "100",
-    "stake": "$28.88",
-    "max_odds": "-141"
+    "true_probability": "61.59%",
+    "ev": "17.58%",
+    "edge_score": "72",
+    "stake": "$11.71",
+    "max_odds": "-160"
+  },
+  {
+    "date": "2026-04-15",
+    "sport": "MLB",
+    "event": "Washington Nationals at Pittsburgh Pirates",
+    "bet_type": "Over 9.5",
+    "odds": "+100",
+    "implied_probability": "50.00%",
+    "true_probability": "58.41%",
+    "ev": "16.82%",
+    "edge_score": "74",
+    "stake": "$10.19",
+    "max_odds": "-140"
   }
 ]

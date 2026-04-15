@@ -1,18 +1,18 @@
 {
-  "provider": "the_odds_api",
-  "enabled": true,
+  "provider": "",
+  "enabled": false,
   "synced": false,
   "requested_date": "2026-04-15",
-  "generated_at": "2026-04-15T06:57:45",
-  "sports_seen": 1,
+  "generated_at": "2026-04-15T14:14:50",
+  "sports_seen": 0,
   "events_seen": 0,
   "markets_written": 0,
   "target_books_used": [],
   "warnings": [
-    "Provider quota exhausted before odds sync completed."
+    "Provider sync skipped by CLI flag."
   ],
   "feed_path": "C:\\Users\\sales\\OneDrive\\Desktop\\X accounts\\ncaa-baseball-hub\\Betting model upgraded\\data\\provider_market_feed.json",
-  "requests_remaining": "0",
-  "requests_used": "500",
-  "last_request_cost": "0"
+  "requests_remaining": "",
+  "requests_used": "",
+  "last_request_cost": ""
 }

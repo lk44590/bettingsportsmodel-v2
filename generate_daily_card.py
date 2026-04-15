@@ -149,7 +149,7 @@ def main() -> int:
     
     # Train ML models if enough historical data exists
     historical_data = load_historical_data()
-    if len(historical_data) >= 5:  # Need at least 5 days of data
+    if historical_data:
         print(f"Attempting to train ML models with {len(historical_data)} days of data...")
         training_results = train_ml_models_from_historical_data()
         if training_results.get("success"):
@@ -157,7 +157,7 @@ def main() -> int:
         else:
             print(f"ML training skipped: {training_results.get('error', 'Unknown error')}")
     else:
-        print(f"ML training skipped: Need at least 5 days of data (currently have {len(historical_data)})")
+        print("ML training skipped: No historical data available yet")
 
     latest_candidates_path = OUTPUT_DIR / "daily-candidates-latest.json"
     dated_candidates_path = OUTPUT_DIR / f"daily-candidates-{day_iso}.json"
@@ -201,6 +201,9 @@ def main() -> int:
     latest_phone_html_path.write_text(phone_html_report, encoding="utf-8")
     dated_phone_html_path.write_text(phone_html_report, encoding="utf-8")
     PHONE_CARD_ROOT_PATH.write_text(phone_html_report, encoding="utf-8")
+    # Also update index.html for GitHub Pages / phone access
+    INDEX_HTML_PATH = ROOT / "index.html"
+    INDEX_HTML_PATH.write_text(phone_html_report, encoding="utf-8")
     phone_text_report = build_phone_text_card(shortlist, candidates, ledger_state, model_performance, provider_report, effective_config, day_iso)
     latest_phone_text_path.write_text(phone_text_report, encoding="utf-8")
     dated_phone_text_path.write_text(phone_text_report, encoding="utf-8")
@@ -355,6 +358,10 @@ def load_external_feed_candidates(
                 sample_size = external_feed_sample_size(row, model_context)
 
             correlation_group = f"{sport}:{team_key}" if team_key else f"{sport}:{slugify(event_name)}"
+            feature_home = model_context["home"] if model_context else None
+            feature_away = model_context["away"] if model_context else None
+            feature_model = model_context["model"] if model_context else None
+            feature_line_value = parse_numeric(line)
             candidate = evaluate_market_candidate(
                 event_date=day_iso,
                 sport=sport,
@@ -380,11 +387,25 @@ def load_external_feed_candidates(
                 sharp_probability=sharp_probability,
                 reference_book_count=safe_int(row.get("reference_book_count")),
                 sharp_book_count=safe_int(row.get("sharp_book_count")),
+                home_team=home_team or (feature_home["team"] if feature_home else ""),
+                away_team=away_team or (feature_away["team"] if feature_away else ""),
+                selection=str(row.get("selection", "")).strip().lower(),
+                selection_team=str(row.get("selection_team", "")).strip(),
+                training_features=build_candidate_feature_vector(
+                    sport=sport,
+                    market_type=market_type,
+                    sample_size=int(sample_size) if not math.isnan(sample_size) else 25,
+                    quality=quality if not math.isnan(quality) else 72.0,
+                    fair_probability=fair_probability,
+                    model_probability=model_probability,
+                    odds=odds,
+                    opposite_odds=opposite_odds,
+                    line_value=None if math.isnan(feature_line_value) else feature_line_value,
+                    home=feature_home,
+                    away=feature_away,
+                    model=feature_model,
+                ),
             )
-            candidate["homeTeam"] = home_team or (model_context["home"]["team"] if model_context else "")
-            candidate["awayTeam"] = away_team or (model_context["away"]["team"] if model_context else "")
-            candidate["selection"] = str(row.get("selection", "")).strip().lower()
-            candidate["selectionTeam"] = str(row.get("selection_team", "")).strip()
             candidate["source"] = source_name
             candidate["providerConsensusProbability"] = "" if consensus_probability is None else round(consensus_probability * 100.0, 2)
             candidate["providerSharpProbability"] = "" if sharp_probability is None else round(sharp_probability * 100.0, 2)
@@ -1453,24 +1474,25 @@ def build_model(
     config: dict[str, Any],
 ) -> dict[str, float] | None:
     sport_cfg = config["sports"][sport]
+    ml_probability = None
     
-    # Get ML prediction if available
-    ml_probability = ml_manager.predict(sport, home, away)
+    # Calculate momentum factor (recent performance trend) - SCALED DOWN for early season
+    sample_size = min(home["games"], away["games"])
+    sample_confidence = min(1.0, sample_size / 40.0)  # Full confidence at 40+ games
     
-    # Calculate momentum factor (recent performance trend)
     home_momentum = (home["win_pct"] - 0.5) * 2.0 + (home["home_pct"] - 0.5) * 0.5
     away_momentum = (away["win_pct"] - 0.5) * 2.0 + (away["road_pct"] - 0.5) * 0.5
-    momentum_factor = (home_momentum - away_momentum) * 0.3
+    momentum_factor = (home_momentum - away_momentum) * 0.3 * sample_confidence
     
-    # Calculate trend analysis factor (recent form)
+    # Calculate trend analysis factor (recent form) - SCALED by sample confidence
     home_trend = (home.get("last_10_win_pct", home["win_pct"]) - 0.5) * 1.5 + (home.get("last_5_win_pct", home["win_pct"]) - 0.5) * 1.0
     away_trend = (away.get("last_10_win_pct", away["win_pct"]) - 0.5) * 1.5 + (away.get("last_5_win_pct", away["win_pct"]) - 0.5) * 1.0
-    trend_factor = (home_trend - away_trend) * 0.25
+    trend_factor = (home_trend - away_trend) * 0.25 * sample_confidence
     
     # Calculate head-to-head historical factor
     home_h2h_advantage = (home.get("h2h_home_win_pct", 0.5) - 0.5) * 0.15
     home_h2h_recent_advantage = (home.get("h2h_recent_win_pct", 0.5) - 0.5) * 0.20
-    h2h_factor = home_h2h_advantage + home_h2h_recent_advantage
+    h2h_factor = (home_h2h_advantage + home_h2h_recent_advantage) * sample_confidence
     
     # Schedule, injury, and weather factors removed - ESPN doesn't provide this data
     schedule_factor = 0.0
@@ -1482,18 +1504,18 @@ def build_model(
     
     if sport in BASEBALL_SPORTS:
         home_strength = (
-            4.0 * (home["win_pct"] - 0.5)
-            + 0.75 * (home["runs_pg"] - sport_cfg["offense_baseline"])
-            - 0.45 * (home["team_era"] - sport_cfg["era_baseline"])
-            - 0.28 * (home["starter_era"] - sport_cfg["era_baseline"])
+            3.0 * (home["win_pct"] - 0.5)  # Reduced from 4.0
+            + 0.6 * (home["runs_pg"] - sport_cfg["offense_baseline"])  # Reduced from 0.75
+            - 0.35 * (home["team_era"] - sport_cfg["era_baseline"])  # Reduced from 0.45
+            - 0.22 * (home["starter_era"] - sport_cfg["era_baseline"])  # Reduced from 0.28
         )
         away_strength = (
-            4.0 * (away["win_pct"] - 0.5)
-            + 0.75 * (away["runs_pg"] - sport_cfg["offense_baseline"])
-            - 0.45 * (away["team_era"] - sport_cfg["era_baseline"])
-            - 0.28 * (away["starter_era"] - sport_cfg["era_baseline"])
+            3.0 * (away["win_pct"] - 0.5)
+            + 0.6 * (away["runs_pg"] - sport_cfg["offense_baseline"])
+            - 0.35 * (away["team_era"] - sport_cfg["era_baseline"])
+            - 0.22 * (away["starter_era"] - sport_cfg["era_baseline"])
         )
-        home_edge = sport_cfg["home_field"] + 0.75 * (home["home_pct"] - away["road_pct"])
+        home_edge = sport_cfg["home_field"] + 0.6 * (home["home_pct"] - away["road_pct"])  # Reduced from 0.75
         margin = (home_strength - away_strength) + home_edge + recent_performance_factor + schedule_factor + injury_factor + h2h_factor + weather_factor
         
         # Weather affects totals (wind blowing out increases totals, rain decreases)
@@ -1507,11 +1529,25 @@ def build_model(
             + 0.18 * ((home["starter_era"] - sport_cfg["era_baseline"]) + (away["starter_era"] - sport_cfg["era_baseline"]))
             + wind_out_factor + rain_factor
         )
+        
+        # Calculate heuristic probability with REGRESSION TO MEAN
+        raw_heuristic_prob = logistic(margin)
+        # Strong regression to 0.50 for early season (less data = more regression)
+        regression_weight = max(0.35, 1.0 - sample_confidence * 0.5)  # 35-60% regression
+        heuristic_prob = (raw_heuristic_prob * (1.0 - regression_weight)) + (0.50 * regression_weight)
+        
+        # CAP extreme probabilities at realistic levels
+        # MLB: max 75% for favorites, min 25% for underdogs
+        max_prob = 0.75 if sample_confidence > 0.5 else 0.70  # Lower cap early season
+        min_prob = 0.25 if sample_confidence > 0.5 else 0.30
+        heuristic_prob = clamp(heuristic_prob, min_prob, max_prob)
+        
         # Ensemble probability: combine heuristic model with ML prediction
-        heuristic_prob = logistic(margin)
         if ml_probability is not None:
-            # Weight ensemble: 60% ML, 40% heuristic when ML available
-            ensemble_home_win_prob = (ml_probability * 0.6) + (heuristic_prob * 0.4)
+            # Weight ensemble: 50% ML, 50% heuristic when ML available (less weight on ML until proven)
+            raw_ensemble = (ml_probability * 0.5) + (heuristic_prob * 0.5)
+            # Apply same caps to ensemble
+            ensemble_home_win_prob = clamp(raw_ensemble, min_prob, max_prob)
         else:
             ensemble_home_win_prob = heuristic_prob
         
@@ -1534,31 +1570,42 @@ def build_model(
 
     if sport in BASKETBALL_SPORTS:
         home_strength = (
-            3.7 * (home["win_pct"] - 0.5)
-            + 0.032 * (home["avg_points"] - sport_cfg["points_baseline"])
-            + 0.010 * (home["fg_pct"] - 46.0)
-            + 0.009 * (home["three_pct"] - 35.0)
-            + 0.010 * (home["avg_assists"] - 25.0)
-            + 0.006 * (home["avg_rebounds"] - 44.0)
+            2.8 * (home["win_pct"] - 0.5)  # Reduced from 3.7
+            + 0.025 * (home["avg_points"] - sport_cfg["points_baseline"])  # Reduced from 0.032
+            + 0.008 * (home["fg_pct"] - 46.0)  # Reduced from 0.010
+            + 0.007 * (home["three_pct"] - 35.0)  # Reduced from 0.009
+            + 0.008 * (home["avg_assists"] - 25.0)  # Reduced from 0.010
+            + 0.005 * (home["avg_rebounds"] - 44.0)  # Reduced from 0.006
         )
         away_strength = (
-            3.7 * (away["win_pct"] - 0.5)
-            + 0.032 * (away["avg_points"] - sport_cfg["points_baseline"])
-            + 0.010 * (away["fg_pct"] - 46.0)
-            + 0.009 * (away["three_pct"] - 35.0)
-            + 0.010 * (away["avg_assists"] - 25.0)
-            + 0.006 * (away["avg_rebounds"] - 44.0)
+            2.8 * (away["win_pct"] - 0.5)
+            + 0.025 * (away["avg_points"] - sport_cfg["points_baseline"])
+            + 0.008 * (away["fg_pct"] - 46.0)
+            + 0.007 * (away["three_pct"] - 35.0)
+            + 0.008 * (away["avg_assists"] - 25.0)
+            + 0.005 * (away["avg_rebounds"] - 44.0)
         )
-        expected_margin = sport_cfg["home_field"] + 7.5 * (home_strength - away_strength) + 1.4 * (home["home_pct"] - away["road_pct"]) + recent_performance_factor + schedule_factor + injury_factor + h2h_factor
+        expected_margin = sport_cfg["home_field"] + 6.0 * (home_strength - away_strength) + 1.2 * (home["home_pct"] - away["road_pct"]) + recent_performance_factor + schedule_factor + injury_factor + h2h_factor
         expected_total = (
             225.0
             + 0.55 * ((home["avg_points"] - sport_cfg["points_baseline"]) + (away["avg_points"] - sport_cfg["points_baseline"]))
             + 0.040 * ((home["fga"] - 88.0) + (away["fga"] - 88.0))
         )
+        # Calculate heuristic probability with REGRESSION TO MEAN
+        raw_heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
+        # NBA: regression weight based on sample confidence
+        regression_weight = max(0.30, 1.0 - sample_confidence * 0.6)  # 30-70% regression
+        heuristic_prob = (raw_heuristic_prob * (1.0 - regression_weight)) + (0.50 * regression_weight)
+        
+        # CAP extreme probabilities: NBA max 72%, min 28%
+        max_prob = 0.72 if sample_confidence > 0.5 else 0.68
+        min_prob = 0.28 if sample_confidence > 0.5 else 0.32
+        heuristic_prob = clamp(heuristic_prob, min_prob, max_prob)
+        
         # Ensemble probability: combine heuristic model with ML prediction
-        heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
         if ml_probability is not None:
-            ensemble_home_win_prob = (ml_probability * 0.6) + (heuristic_prob * 0.4)
+            raw_ensemble = (ml_probability * 0.5) + (heuristic_prob * 0.5)
+            ensemble_home_win_prob = clamp(raw_ensemble, min_prob, max_prob)
         else:
             ensemble_home_win_prob = heuristic_prob
         
@@ -1580,25 +1627,35 @@ def build_model(
 
     if sport in HOCKEY_SPORTS:
         home_strength = (
-            4.2 * (home["points_pct"] - 0.5)
-            + 0.8 * (home["goals_pg"] - sport_cfg["goals_baseline"])
-            + 6.0 * (home["save_pct"] - sport_cfg["save_pct_baseline"])
+            3.2 * (home["points_pct"] - 0.5)  # Reduced from 4.2
+            + 0.65 * (home["goals_pg"] - sport_cfg["goals_baseline"])  # Reduced from 0.8
+            + 4.5 * (home["save_pct"] - sport_cfg["save_pct_baseline"])  # Reduced from 6.0
         )
         away_strength = (
-            4.2 * (away["points_pct"] - 0.5)
-            + 0.8 * (away["goals_pg"] - sport_cfg["goals_baseline"])
-            + 6.0 * (away["save_pct"] - sport_cfg["save_pct_baseline"])
+            3.2 * (away["points_pct"] - 0.5)
+            + 0.65 * (away["goals_pg"] - sport_cfg["goals_baseline"])
+            + 4.5 * (away["save_pct"] - sport_cfg["save_pct_baseline"])
         )
-        expected_margin = sport_cfg["home_field"] + 1.8 * (home_strength - away_strength) + 0.6 * (home["home_pct"] - away["road_pct"]) + recent_performance_factor + schedule_factor + injury_factor + h2h_factor
+        expected_margin = sport_cfg["home_field"] + 1.5 * (home_strength - away_strength) + 0.5 * (home["home_pct"] - away["road_pct"]) + recent_performance_factor + schedule_factor + injury_factor + h2h_factor
         expected_total = (
             6.0
             + 0.55 * ((home["goals_pg"] - sport_cfg["goals_baseline"]) + (away["goals_pg"] - sport_cfg["goals_baseline"]))
             - 10.0 * ((home["save_pct"] - sport_cfg["save_pct_baseline"]) + (away["save_pct"] - sport_cfg["save_pct_baseline"]))
         )
-        # Ensemble probability: combine heuristic model with ML prediction
-        heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
+        # Calculate heuristic probability with REGRESSION TO MEAN
+        raw_heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
+        regression_weight = max(0.32, 1.0 - sample_confidence * 0.55)  # 32-67% regression
+        heuristic_prob = (raw_heuristic_prob * (1.0 - regression_weight)) + (0.50 * regression_weight)
+        
+        # CAP extreme probabilities: NHL max 73%, min 27%
+        max_prob = 0.73 if sample_confidence > 0.5 else 0.69
+        min_prob = 0.27 if sample_confidence > 0.5 else 0.31
+        heuristic_prob = clamp(heuristic_prob, min_prob, max_prob)
+        
+        # Ensemble probability
         if ml_probability is not None:
-            ensemble_home_win_prob = (ml_probability * 0.6) + (heuristic_prob * 0.4)
+            raw_ensemble = (ml_probability * 0.5) + (heuristic_prob * 0.5)
+            ensemble_home_win_prob = clamp(raw_ensemble, min_prob, max_prob)
         else:
             ensemble_home_win_prob = heuristic_prob
         
@@ -1621,15 +1678,26 @@ def build_model(
     if sport in FOOTBALL_SPORTS:
         expected_margin = (
             sport_cfg["home_field"]
-            + sport_cfg["record_weight"] * (home["win_pct"] - away["win_pct"])
-            + sport_cfg["venue_weight"] * (home["home_pct"] - away["road_pct"])
+            + sport_cfg["record_weight"] * (home["win_pct"] - away["win_pct"]) * 0.85  # Reduce record weight impact
+            + sport_cfg["venue_weight"] * (home["home_pct"] - away["road_pct"]) * 0.85
             + recent_performance_factor + schedule_factor + injury_factor + h2h_factor + weather_factor
         )
-        expected_total = sport_cfg["total_baseline"] + 4.0 * ((home["win_pct"] - 0.5) + (away["win_pct"] - 0.5))
-        # Ensemble probability: combine heuristic model with ML prediction
-        heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
+        expected_total = sport_cfg["total_baseline"] + 3.0 * ((home["win_pct"] - 0.5) + (away["win_pct"] - 0.5))  # Reduced from 4.0
+        # Calculate heuristic probability with REGRESSION TO MEAN
+        raw_heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
+        # NFL has more variance, higher regression weight
+        regression_weight = max(0.35, 1.0 - sample_confidence * 0.5)  # 35-65% regression
+        heuristic_prob = (raw_heuristic_prob * (1.0 - regression_weight)) + (0.50 * regression_weight)
+        
+        # CAP extreme probabilities: NFL max 70%, min 30% (most unpredictable sport)
+        max_prob = 0.70 if sample_confidence > 0.5 else 0.65
+        min_prob = 0.30 if sample_confidence > 0.5 else 0.35
+        heuristic_prob = clamp(heuristic_prob, min_prob, max_prob)
+        
+        # Ensemble probability
         if ml_probability is not None:
-            ensemble_home_win_prob = (ml_probability * 0.6) + (heuristic_prob * 0.4)
+            raw_ensemble = (ml_probability * 0.5) + (heuristic_prob * 0.5)
+            ensemble_home_win_prob = clamp(raw_ensemble, min_prob, max_prob)
         else:
             ensemble_home_win_prob = heuristic_prob
         
@@ -1652,27 +1720,37 @@ def build_model(
 
     if sport in SOCCER_SPORTS:
         home_strength = (
-            3.4 * (home["points_pct"] - 0.5)
-            + 0.8 * (home["goals_pg"] - sport_cfg["goals_baseline"])
-            + 0.10 * (home["shots_on_target_pg"] - sport_cfg["shots_baseline"])
-            + 0.010 * (home["possession_pct"] - sport_cfg["possession_baseline"])
+            2.6 * (home["points_pct"] - 0.5)  # Reduced from 3.4
+            + 0.6 * (home["goals_pg"] - sport_cfg["goals_baseline"])  # Reduced from 0.8
+            + 0.08 * (home["shots_on_target_pg"] - sport_cfg["shots_baseline"])  # Reduced from 0.10
+            + 0.008 * (home["possession_pct"] - sport_cfg["possession_baseline"])  # Reduced from 0.010
         )
         away_strength = (
-            3.4 * (away["points_pct"] - 0.5)
-            + 0.8 * (away["goals_pg"] - sport_cfg["goals_baseline"])
-            + 0.10 * (away["shots_on_target_pg"] - sport_cfg["shots_baseline"])
-            + 0.010 * (away["possession_pct"] - sport_cfg["possession_baseline"])
+            2.6 * (away["points_pct"] - 0.5)
+            + 0.6 * (away["goals_pg"] - sport_cfg["goals_baseline"])
+            + 0.08 * (away["shots_on_target_pg"] - sport_cfg["shots_baseline"])
+            + 0.008 * (away["possession_pct"] - sport_cfg["possession_baseline"])
         )
-        expected_margin = sport_cfg["home_field"] + 0.95 * (home_strength - away_strength) + 0.45 * (home["home_pct"] - away["road_pct"]) + recent_performance_factor + schedule_factor + injury_factor + h2h_factor + weather_factor
+        expected_margin = sport_cfg["home_field"] + 0.75 * (home_strength - away_strength) + 0.40 * (home["home_pct"] - away["road_pct"]) + recent_performance_factor + schedule_factor + injury_factor + h2h_factor + weather_factor
         expected_total = (
             2.55
             + 0.60 * ((home["goals_pg"] - sport_cfg["goals_baseline"]) + (away["goals_pg"] - sport_cfg["goals_baseline"]))
             + 0.08 * ((home["shots_on_target_pg"] - sport_cfg["shots_baseline"]) + (away["shots_on_target_pg"] - sport_cfg["shots_baseline"]))
         )
-        # Ensemble probability: combine heuristic model with ML prediction
-        heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
+        # Calculate heuristic probability with REGRESSION TO MEAN
+        raw_heuristic_prob = 1.0 - normal_cdf(0.0, expected_margin, sport_cfg["spread_sd"])
+        regression_weight = max(0.30, 1.0 - sample_confidence * 0.6)  # 30-70% regression
+        heuristic_prob = (raw_heuristic_prob * (1.0 - regression_weight)) + (0.50 * regression_weight)
+        
+        # CAP extreme probabilities: Soccer max 70% (draws make it less predictable), min 30%
+        max_prob = 0.70 if sample_confidence > 0.5 else 0.65
+        min_prob = 0.30 if sample_confidence > 0.5 else 0.35
+        heuristic_prob = clamp(heuristic_prob, min_prob, max_prob)
+        
+        # Ensemble probability
         if ml_probability is not None:
-            ensemble_home_win_prob = (ml_probability * 0.6) + (heuristic_prob * 0.4)
+            raw_ensemble = (ml_probability * 0.5) + (heuristic_prob * 0.5)
+            ensemble_home_win_prob = clamp(raw_ensemble, min_prob, max_prob)
         else:
             ensemble_home_win_prob = heuristic_prob
         
@@ -1749,6 +1827,24 @@ def build_market_candidates(
                 line="ML",
                 notes=home_notes,
                 correlation_group=correlation_group,
+                home_team=home["team"],
+                away_team=away["team"],
+                selection="home",
+                selection_team=home["team"],
+                training_features=build_candidate_feature_vector(
+                    sport=sport,
+                    market_type="moneyline",
+                    sample_size=sample_size,
+                    quality=model["quality"],
+                    fair_probability=fair_home,
+                    model_probability=model["home_win_prob"],
+                    odds=ml_home_odds,
+                    opposite_odds=ml_away_odds,
+                    line_value=None,
+                    home=home,
+                    away=away,
+                    model=model,
+                ),
             )
         )
         candidates.append(
@@ -1773,6 +1869,24 @@ def build_market_candidates(
                 line="ML",
                 notes=away_notes,
                 correlation_group=correlation_group,
+                home_team=home["team"],
+                away_team=away["team"],
+                selection="away",
+                selection_team=away["team"],
+                training_features=build_candidate_feature_vector(
+                    sport=sport,
+                    market_type="moneyline",
+                    sample_size=sample_size,
+                    quality=model["quality"],
+                    fair_probability=fair_away,
+                    model_probability=1.0 - model["home_win_prob"],
+                    odds=ml_away_odds,
+                    opposite_odds=ml_home_odds,
+                    line_value=None,
+                    home=home,
+                    away=away,
+                    model=model,
+                ),
             )
         )
 
@@ -1806,6 +1920,24 @@ def build_market_candidates(
                     line=f"O{over_data['line']}",
                     notes=total_note,
                     correlation_group=correlation_group,
+                    home_team=home["team"],
+                    away_team=away["team"],
+                    selection="over",
+                    selection_team="",
+                    training_features=build_candidate_feature_vector(
+                        sport=sport,
+                        market_type="total",
+                        sample_size=sample_size,
+                        quality=model["quality"] - 3,
+                        fair_probability=fair_over,
+                        model_probability=over_prob,
+                        odds=over_data["odds"],
+                        opposite_odds=under_data["odds"],
+                        line_value=over_data["line"],
+                        home=home,
+                        away=away,
+                        model=model,
+                    ),
                 )
             )
             candidates.append(
@@ -1830,6 +1962,24 @@ def build_market_candidates(
                     line=f"U{under_data['line']}",
                     notes=total_note,
                     correlation_group=correlation_group,
+                    home_team=home["team"],
+                    away_team=away["team"],
+                    selection="under",
+                    selection_team="",
+                    training_features=build_candidate_feature_vector(
+                        sport=sport,
+                        market_type="total",
+                        sample_size=sample_size,
+                        quality=model["quality"] - 3,
+                        fair_probability=fair_under,
+                        model_probability=1.0 - over_prob,
+                        odds=under_data["odds"],
+                        opposite_odds=over_data["odds"],
+                        line_value=under_data["line"],
+                        home=home,
+                        away=away,
+                        model=model,
+                    ),
                 )
             )
 
@@ -1863,6 +2013,24 @@ def build_market_candidates(
                     line=f"{home_spread['line']:+.1f}",
                     notes=spread_note,
                     correlation_group=correlation_group,
+                    home_team=home["team"],
+                    away_team=away["team"],
+                    selection="home",
+                    selection_team=home["team"],
+                    training_features=build_candidate_feature_vector(
+                        sport=sport,
+                        market_type="spread",
+                        sample_size=sample_size,
+                        quality=model["quality"] - 2,
+                        fair_probability=fair_home,
+                        model_probability=home_cover,
+                        odds=home_spread["odds"],
+                        opposite_odds=away_spread["odds"],
+                        line_value=home_spread["line"],
+                        home=home,
+                        away=away,
+                        model=model,
+                    ),
                 )
             )
             candidates.append(
@@ -1887,6 +2055,24 @@ def build_market_candidates(
                     line=f"{away_spread['line']:+.1f}",
                     notes=spread_note,
                     correlation_group=correlation_group,
+                    home_team=home["team"],
+                    away_team=away["team"],
+                    selection="away",
+                    selection_team=away["team"],
+                    training_features=build_candidate_feature_vector(
+                        sport=sport,
+                        market_type="spread",
+                        sample_size=sample_size,
+                        quality=model["quality"] - 2,
+                        fair_probability=fair_away,
+                        model_probability=spread_cover_probability("away", away_spread["line"], model["margin"], model["spread_sd"]),
+                        odds=away_spread["odds"],
+                        opposite_odds=home_spread["odds"],
+                        line_value=away_spread["line"],
+                        home=home,
+                        away=away,
+                        model=model,
+                    ),
                 )
             )
 
@@ -1919,12 +2105,42 @@ def evaluate_market_candidate(
     sharp_probability: float | None = None,
     reference_book_count: int = 0,
     sharp_book_count: int = 0,
+    home_team: str = "",
+    away_team: str = "",
+    selection: str = "",
+    selection_team: str = "",
+    training_features: list[float] | None = None,
 ) -> dict[str, Any]:
     raw_model_gap_pct = abs(model_probability - fair_probability) * 100.0
     raw_extreme_pct = abs(model_probability - 0.5) * 100.0
-    # Cap model probability at 95% to prevent unrealistic predictions
-    capped_model_probability = min(model_probability, 0.95)
-    calibrated_probability = (capped_model_probability * 0.85) + (0.50 * 0.15)
+    
+    # Sport-specific realistic probability caps
+    sport_caps = {
+        "MLB": (0.25, 0.75),  # Baseball: 25%-75%
+        "NCAABASE": (0.25, 0.75),
+        "NBA": (0.28, 0.72),  # Basketball: 28%-72%
+        "WNBA": (0.28, 0.72),
+        "NCAAMB": (0.28, 0.72),
+        "NCAAWB": (0.28, 0.72),
+        "NHL": (0.27, 0.73),  # Hockey: 27%-73%
+        "NFL": (0.30, 0.70),  # Football: 30%-70%
+        "NCAAF": (0.30, 0.70),
+    }
+    min_prob_cap, max_prob_cap = sport_caps.get(sport, (0.28, 0.72))
+    
+    # Adjust caps based on sample size (early season = more conservative)
+    sample_confidence = min(1.0, sample_size / 40.0)
+    if sample_confidence < 0.5:
+        # Tighten caps for early season (less data = less confidence)
+        min_prob_cap = min_prob_cap + 0.05
+        max_prob_cap = max_prob_cap - 0.05
+    
+    # Cap model probability at realistic sport-specific limits
+    capped_model_probability = clamp(model_probability, min_prob_cap, max_prob_cap)
+    
+    # Calibrated probability with regression to mean
+    calibration_weight = 0.85 if sample_confidence > 0.5 else 0.70  # More regression early season
+    calibrated_probability = (capped_model_probability * calibration_weight) + (0.50 * (1.0 - calibration_weight))
     reference_probability = sharp_probability if sharp_probability is not None else consensus_probability
     reference_gap_pct = abs(reference_probability - fair_probability) * 100.0 if reference_probability is not None else 0.0
     market_respect_weight = clamp(
@@ -1968,7 +2184,12 @@ def evaluate_market_candidate(
             min(0.99, fair_probability + probability_gap_cap),
         )
     quality_penalty = max(0.0, 75.0 - quality) / 1000.0
-    sample_penalty = max(0.0, 18 - sample_size) / 1000.0
+    # Increased sample penalty for early season (insufficient data)
+    # Normal penalty: 1.5% per game under 18
+    # Early season (<20 games): additional 3% penalty
+    base_sample_penalty = max(0.0, 20 - sample_size) / 1000.0  # Increased threshold from 18 to 20
+    early_season_penalty = max(0.0, (20 - sample_size) * 0.003) if sample_size < 20 else 0.0
+    sample_penalty = base_sample_penalty + early_season_penalty
     missing_opposite_penalty = 0.0 if opposite_odds is not None else 0.005
     history_adjustment = history_penalty_for_market(history_profile, sport, market_type)
     gap_penalty_pct = min(
@@ -1993,17 +2214,46 @@ def evaluate_market_candidate(
     if provider_supported:
         uncertainty_haircut *= float(config.get("provider_supported_haircut_multiplier", 0.72))
     base_probability = clamp(market_respected_probability - uncertainty_haircut, 0.01, 0.99)
+    history_confidence_bonus = history_adjustment.get("boost_pct", 0.0) / 100.0
+    if history_confidence_bonus > 0.0:
+        base_probability = clamp(base_probability + history_confidence_bonus, 0.01, 0.99)
     
     # Apply weighted blend to combine model probability with market probability
     bayesian_weight = float(config.get("true_probability_weight", 0.7))
     true_probability = weighted_blend(model_probability, base_probability, bayesian_weight)
+    candidate_ml_probability = ml_manager.predict_market(sport, market_type, training_features)
+    ml_blend_weight = 0.0
+    if candidate_ml_probability is not None:
+        sample_confidence_ml = min(1.0, sample_size / 60.0)
+        ml_blend_weight = clamp(0.08 + (0.12 * sample_confidence_ml), 0.08, 0.20)
+        true_probability = weighted_blend(true_probability, candidate_ml_probability, ml_blend_weight)
     
     implied_probability = american_to_probability(odds)
     payout_multiple = american_to_profit_multiple(odds)
     ev = (true_probability * payout_multiple) - (1.0 - true_probability)
     edge = true_probability - fair_probability
+    
+    # Calculate sample confidence for Kelly adjustment
+    sample_confidence_kelly = min(1.0, sample_size / 40.0)
+    
+    # Kelly criterion with uncertainty adjustment
     full_kelly = max(0.0, ((payout_multiple * true_probability) - (1.0 - true_probability)) / payout_multiple)
-    stake_pct = min(config["max_stake_pct"], full_kelly * config["kelly_fraction"] * drawdown_multiplier)
+    
+    # Reduce Kelly fraction for low sample sizes (early season = less confidence)
+    # At 10 games: 40% of normal kelly fraction
+    # At 40+ games: 100% of normal kelly fraction
+    sample_kelly_multiplier = 0.4 + (0.6 * sample_confidence_kelly)
+    
+    # Also apply uncertainty penalty to EV edge for stake calculation
+    edge_confidence = sample_confidence_kelly * (quality / 100.0)
+    adjusted_kelly_fraction = config["kelly_fraction"] * sample_kelly_multiplier * edge_confidence
+    
+    stake_pct = min(config["max_stake_pct"], full_kelly * adjusted_kelly_fraction * drawdown_multiplier)
+    
+    # Hard cap on single bet size: max 3% for early season (<20 games)
+    max_single_bet = 0.03 if sample_size < 20 else config["max_stake_pct"]
+    stake_pct = min(stake_pct, max_single_bet)
+    
     stake = current_bankroll * stake_pct
     reliability = clamp(
         45.0
@@ -2054,6 +2304,7 @@ def evaluate_market_candidate(
     sample_size_bonus = 0.0
     if sample_size >= 50:
         sample_size_bonus = min(5.0, (sample_size - 50) * 0.05)
+    history_bonus = float(history_adjustment.get("boost_pct", 0.0)) * float(config.get("history_boost_score_multiplier", 4.5))
     
     # Calculate enhanced composite score
     composite_score = (
@@ -2064,6 +2315,7 @@ def evaluate_market_candidate(
         market_respect_bonus +
         provider_bonus +
         quality_bonus +
+        history_bonus +
         sample_size_bonus -
         longshot_penalty -
         public_longshot_penalty
@@ -2085,8 +2337,8 @@ def evaluate_market_candidate(
         not provider_supported and unsupported_positive_odds_cap > 0 and odds > unsupported_positive_odds_cap
     )
     final_notes = notes
-    if history_adjustment["penalty_pct"] > 0.0:
-        final_notes = f"{notes} History guardrail: {history_adjustment['summary']}."
+    if history_adjustment["summary"]:
+        final_notes = f"{notes} History signal: {history_adjustment['summary']}."
 
     return {
         "id": f"{event_id}-{market_type}-{slugify(bet_type)}",
@@ -2107,12 +2359,18 @@ def evaluate_market_candidate(
         "source": "espn",
         "line": line,
         "correlationGroup": correlation_group or event_id,
+        "homeTeam": home_team,
+        "awayTeam": away_team,
+        "selection": selection,
+        "selectionTeam": selection_team,
         "notes": final_notes,
         "implied_probability_pct": round(implied_probability * 100.0, 2),
         "fair_probability_pct": round(fair_probability * 100.0, 2),
         "reference_probability_pct": "" if reference_probability is None else round(reference_probability * 100.0, 2),
         "market_respected_probability_pct": round(market_respected_probability * 100.0, 2),
         "true_probability_pct": round(true_probability * 100.0, 2),
+        "candidate_ml_probability_pct": "" if candidate_ml_probability is None else round(candidate_ml_probability * 100.0, 2),
+        "candidate_ml_blend_weight_pct": round(ml_blend_weight * 100.0, 2),
         "ev_pct": round(ev * 100.0, 2),
         "edge_pct": round(edge * 100.0, 2),
         "stake": round(stake, 2),
@@ -2121,6 +2379,7 @@ def evaluate_market_candidate(
         "max_odds": probability_to_american(true_probability),
         "edge_score": round(reliability),
         "history_penalty_pct": round(history_adjustment["penalty_pct"], 2),
+        "history_boost_pct": round(history_adjustment.get("boost_pct", 0.0), 2),
         "model_gap_penalty_pct": round(gap_penalty_pct, 2),
         "model_extreme_penalty_pct": round(extreme_penalty_pct, 2),
         "probability_bonus": round(probability_bonus, 2),
@@ -2128,6 +2387,7 @@ def evaluate_market_candidate(
         "public_longshot_penalty": round(public_longshot_penalty, 2),
         "history_context": history_adjustment["summary"],
         "provider_supported": provider_supported,
+        "training_features": training_features or [],
         "filter_reasons": filter_reasons,
         "qualified": qualified,
         "composite_score": round(composite_score, 2),
@@ -2167,7 +2427,10 @@ def pick_top_candidates(candidates: list[dict[str, Any]], config: dict[str, Any]
     correlation_threshold = config.get("correlation_threshold", 0.7)
     max_correlated_bets = config.get("max_correlated_bets", 1)
 
-    qualified = [candidate for candidate in candidates if candidate["qualified"]]
+    qualified = shortlist_best_bet_candidates(
+        [candidate for candidate in candidates if candidate["qualified"]],
+        config,
+    )
     for enforce_diversity in (True, False):
         for candidate in qualified:
             if pick_limit is not None and len(picks) >= pick_limit:
@@ -2204,7 +2467,42 @@ def resolve_pick_limit(config: dict[str, Any], requested_limit: int) -> int | No
     config_limit = int(config.get("max_total_picks", 0) or 0)
     if config_limit > 0:
         limits.append(config_limit)
+    if bool(config.get("_provider_safe_mode")):
+        no_provider_limit = int(config.get("max_total_picks_without_provider", 0) or 0)
+        if no_provider_limit > 0:
+            limits.append(no_provider_limit)
     return min(limits) if limits else None
+
+
+def shortlist_best_bet_candidates(candidates: list[dict[str, Any]], config: dict[str, Any]) -> list[dict[str, Any]]:
+    if not candidates:
+        return candidates
+
+    ordered = sorted(candidates, key=lambda item: item["composite_score"], reverse=True)
+    best_score = float(ordered[0].get("composite_score", 0.0))
+    abs_floor = float(config.get("best_bet_min_composite_score", 140.0))
+    relative_ratio = float(config.get("best_bet_score_ratio", 0.62))
+    max_score_drop = float(config.get("best_bet_max_score_drop", 140.0))
+    min_edge_score = float(config.get("best_bet_min_edge_score", 72.0))
+    min_ev = float(config.get("best_bet_min_ev_pct", config.get("min_ev_pct", 0.0)))
+
+    score_floor = max(abs_floor, best_score * relative_ratio, best_score - max_score_drop)
+    best_only = [
+        candidate
+        for candidate in ordered
+        if float(candidate.get("composite_score", 0.0)) >= score_floor
+        and float(candidate.get("edge_score", 0.0)) >= min_edge_score
+        and float(candidate.get("ev_pct", 0.0)) >= min_ev
+    ]
+    if best_only:
+        return best_only
+
+    fallback = [
+        candidate
+        for candidate in ordered
+        if float(candidate.get("edge_score", 0.0)) >= min_edge_score
+    ]
+    return fallback or ordered
 
 
 def deduplicate_candidate_sources(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -3632,63 +3930,110 @@ def summarize_history_bucket(bucket: dict[str, float], config: dict[str, Any], m
     roi_pct = (bucket["profit_sum"] / stake_sum * 100.0) if stake_sum > 0 else 0.0
     avg_clv_pct = (bucket["clv_sum"] / bucket["clv_count"]) if bucket["clv_count"] > 0 else 0.0
     penalty_pct = 0.0
+    boost_pct = 0.0
     if bets >= min_bets:
         if roi_pct < 0.0:
             penalty_pct += float(config.get("history_negative_roi_penalty_pct", 0.0))
         if avg_clv_pct < 0.0 and bucket["clv_count"] >= max(5.0, min_bets / 2.0):
             penalty_pct += abs(avg_clv_pct) * float(config.get("history_clv_penalty_scale", 0.0))
+        if roi_pct > float(config.get("history_positive_roi_trigger_pct", 2.0)):
+            boost_pct += min(
+                float(config.get("history_positive_roi_boost_cap_pct", 1.5)),
+                roi_pct * float(config.get("history_positive_roi_boost_scale", 0.08)),
+            )
+        if avg_clv_pct > float(config.get("history_positive_clv_trigger_pct", 0.5)) and bucket["clv_count"] >= max(5.0, min_bets / 2.0):
+            boost_pct += min(
+                float(config.get("history_positive_clv_boost_cap_pct", 1.0)),
+                avg_clv_pct * float(config.get("history_positive_clv_boost_scale", 0.18)),
+            )
     penalty_pct = min(penalty_pct, float(config.get("history_penalty_cap_pct", 2.0)))
+    boost_pct = min(boost_pct, float(config.get("history_boost_cap_pct", 2.0)))
     return {
         "bets": bets,
         "stake_sum": round(stake_sum, 2),
         "roi_pct": round(roi_pct, 2),
         "avg_clv_pct": round(avg_clv_pct, 2),
         "penalty_pct": round(penalty_pct, 2),
+        "boost_pct": round(boost_pct, 2),
     }
 
 
 def history_penalty_for_market(history_profile: dict[str, Any], sport: str, market_type: str) -> dict[str, Any]:
     if not history_profile:
-        return {"penalty_pct": 0.0, "summary": ""}
+        return {"penalty_pct": 0.0, "boost_pct": 0.0, "summary": ""}
 
-    candidates: list[tuple[float, str]] = []
+    penalty_candidates: list[tuple[float, str]] = []
+    boost_candidates: list[tuple[float, str]] = []
     cap_pct = float(history_profile.get("cap_pct", 2.0))
     sport_market_key = f"{sport}:{market_type}"
 
     sport_market = history_profile.get("sport_market", {}).get(sport_market_key)
     if sport_market and sport_market["penalty_pct"] > 0.0:
-        candidates.append(
+        penalty_candidates.append(
             (
                 sport_market["penalty_pct"],
                 f"{sport} {market_type} has {sport_market['bets']} settled bets, ROI {sport_market['roi_pct']:.2f}%, CLV {sport_market['avg_clv_pct']:.2f}%",
             )
         )
+    if sport_market and sport_market.get("boost_pct", 0.0) > 0.0:
+        boost_candidates.append(
+            (
+                sport_market["boost_pct"],
+                f"{sport} {market_type} is running hot with {sport_market['bets']} settled bets, ROI {sport_market['roi_pct']:.2f}%, CLV {sport_market['avg_clv_pct']:.2f}%",
+            )
+        )
 
     sport_summary = history_profile.get("sport", {}).get(sport)
     if sport_summary and sport_summary["penalty_pct"] > 0.0:
-        candidates.append(
+        penalty_candidates.append(
             (
                 sport_summary["penalty_pct"] * 0.6,
                 f"{sport} overall has {sport_summary['bets']} settled bets, ROI {sport_summary['roi_pct']:.2f}%, CLV {sport_summary['avg_clv_pct']:.2f}%",
             )
         )
+    if sport_summary and sport_summary.get("boost_pct", 0.0) > 0.0:
+        boost_candidates.append(
+            (
+                sport_summary["boost_pct"] * 0.5,
+                f"{sport} overall is earning trust with {sport_summary['bets']} settled bets, ROI {sport_summary['roi_pct']:.2f}%, CLV {sport_summary['avg_clv_pct']:.2f}%",
+            )
+        )
 
     market_summary = history_profile.get("market", {}).get(market_type)
     if market_summary and market_summary["penalty_pct"] > 0.0:
-        candidates.append(
+        penalty_candidates.append(
             (
                 market_summary["penalty_pct"] * 0.6,
                 f"{market_type} overall has {market_summary['bets']} settled bets, ROI {market_summary['roi_pct']:.2f}%, CLV {market_summary['avg_clv_pct']:.2f}%",
             )
         )
+    if market_summary and market_summary.get("boost_pct", 0.0) > 0.0:
+        boost_candidates.append(
+            (
+                market_summary["boost_pct"] * 0.5,
+                f"{market_type} overall is earning trust with {market_summary['bets']} settled bets, ROI {market_summary['roi_pct']:.2f}%, CLV {market_summary['avg_clv_pct']:.2f}%",
+            )
+        )
 
-    if not candidates:
-        return {"penalty_pct": 0.0, "summary": ""}
+    penalty_pct = 0.0
+    penalty_summary = ""
+    if penalty_candidates:
+        penalty_pct, penalty_summary = max(penalty_candidates, key=lambda item: item[0])
 
-    penalty_pct, summary = max(candidates, key=lambda item: item[0])
+    boost_pct = 0.0
+    boost_summary = ""
+    if boost_candidates:
+        boost_pct, boost_summary = max(boost_candidates, key=lambda item: item[0])
+
+    summary_parts = []
+    if penalty_summary:
+        summary_parts.append(penalty_summary)
+    if boost_summary:
+        summary_parts.append(boost_summary)
     return {
         "penalty_pct": round(min(penalty_pct, cap_pct), 2),
-        "summary": summary,
+        "boost_pct": round(min(boost_pct, float(history_profile.get("cap_pct", 2.0))), 2),
+        "summary": " | ".join(summary_parts),
     }
 
 
@@ -3749,6 +4094,12 @@ def settle_model_results(as_of_date_iso: str) -> dict[str, int]:
         event = event_cache[cache_key].get(str(row.get("event_id", "")))
         if not event:
             event = find_matching_event(list(event_cache[cache_key].values()), row)
+        if event and not is_settled_result(row):
+            current_market_row = snapshot_open_market_row(row, event)
+            if current_market_row != row:
+                rows[index] = current_market_row
+                updated_count += 1
+                row = current_market_row
         settled_row = settle_model_result_row(row, event, row_date)
         if not settled_row:
             continue
@@ -3809,6 +4160,29 @@ def settle_model_result_row(row: dict[str, str], event: dict[str, Any] | None, r
         }
     )
     return settled_row
+
+
+def snapshot_open_market_row(row: dict[str, str], event: dict[str, Any]) -> dict[str, str]:
+    competition = safe_get(event, "competitions", 0)
+    if not competition:
+        return row
+
+    closing_market = extract_closing_market(competition, row)
+    closing_odds = closing_market.get("odds")
+    closing_line = closing_market.get("line")
+    if closing_odds is None and closing_line is None:
+        return row
+
+    updated = dict(row)
+    odds_value = parse_american(updated.get("odds"))
+    clv_pct = calculate_clv_pct(odds_value, closing_odds) if odds_value is not None else math.nan
+    if closing_odds is not None:
+        updated["closing_odds"] = format_american(closing_odds)
+    if closing_line is not None:
+        updated["closing_line"] = format_float(closing_line)
+    if not math.isnan(clv_pct):
+        updated["clv_pct"] = f"{clv_pct:.2f}"
+    return updated
 
 
 def find_matching_event(events: list[dict[str, Any]], row: dict[str, str]) -> dict[str, Any] | None:
@@ -4311,6 +4685,92 @@ def blend_external_model_probability(
     return None
 
 
+def build_candidate_feature_vector(
+    *,
+    sport: str,
+    market_type: str,
+    sample_size: int,
+    quality: float,
+    fair_probability: float,
+    model_probability: float,
+    odds: int,
+    opposite_odds: int | None,
+    line_value: float | None,
+    home: dict[str, Any] | None,
+    away: dict[str, Any] | None,
+    model: dict[str, Any] | None,
+) -> list[float]:
+    features = [
+        clamp(sample_size / 100.0, 0.0, 1.5),
+        clamp(quality / 100.0, 0.0, 1.0),
+        clamp(fair_probability, 0.01, 0.99),
+        clamp(model_probability, 0.01, 0.99),
+        american_to_probability(odds),
+        0.5 if opposite_odds is None else american_to_probability(opposite_odds),
+        american_to_profit_multiple(odds),
+        0.0 if line_value is None or math.isnan(line_value) else line_value,
+        0.0 if model is None else float(model.get("margin", 0.0)),
+        0.0 if model is None else float(model.get("expected_total", 0.0)),
+        0.0 if model is None else float(model.get("quality", quality)) / 100.0,
+    ]
+
+    if home and away:
+        features.extend(
+            [
+                float(home.get("win_pct", 0.5)) - float(away.get("win_pct", 0.5)),
+                float(home.get("home_pct", 0.5)) - float(away.get("road_pct", 0.5)),
+                float(home.get("last_10_win_pct", home.get("win_pct", 0.5))) - float(away.get("last_10_win_pct", away.get("win_pct", 0.5))),
+                float(home.get("last_5_win_pct", home.get("win_pct", 0.5))) - float(away.get("last_5_win_pct", away.get("win_pct", 0.5))),
+            ]
+        )
+        if sport in BASEBALL_SPORTS:
+            features.extend(
+                [
+                    float(home.get("runs_pg", 0.0)) - float(away.get("runs_pg", 0.0)),
+                    float(away.get("team_era", 0.0)) - float(home.get("team_era", 0.0)),
+                    float(away.get("starter_era", 0.0)) - float(home.get("starter_era", 0.0)),
+                ]
+            )
+        elif sport in BASKETBALL_SPORTS:
+            features.extend(
+                [
+                    float(home.get("avg_points", 0.0)) - float(away.get("avg_points", 0.0)),
+                    float(home.get("fg_pct", 0.0)) - float(away.get("fg_pct", 0.0)),
+                    float(home.get("three_pct", 0.0)) - float(away.get("three_pct", 0.0)),
+                    float(home.get("avg_rebounds", 0.0)) - float(away.get("avg_rebounds", 0.0)),
+                ]
+            )
+        elif sport in HOCKEY_SPORTS:
+            features.extend(
+                [
+                    float(home.get("goals_pg", 0.0)) - float(away.get("goals_pg", 0.0)),
+                    float(home.get("save_pct", 0.9)) - float(away.get("save_pct", 0.9)),
+                    float(home.get("points_pct", 0.5)) - float(away.get("points_pct", 0.5)),
+                ]
+            )
+        elif sport in FOOTBALL_SPORTS:
+            features.extend(
+                [
+                    float(home.get("points_pct", 0.5)) - float(away.get("points_pct", 0.5)),
+                    float(home.get("home_pct", 0.5)) - float(away.get("road_pct", 0.5)),
+                ]
+            )
+        elif sport in SOCCER_SPORTS:
+            features.extend(
+                [
+                    float(home.get("goals_pg", 0.0)) - float(away.get("goals_pg", 0.0)),
+                    float(home.get("shots_on_target_pg", 0.0)) - float(away.get("shots_on_target_pg", 0.0)),
+                    float(home.get("possession_pct", 50.0)) - float(away.get("possession_pct", 50.0)),
+                    float(home.get("points_pct", 0.5)) - float(away.get("points_pct", 0.5)),
+                ]
+            )
+
+    features.append(1.0 if market_type == "moneyline" else 0.0)
+    features.append(1.0 if market_type == "spread" else 0.0)
+    features.append(1.0 if market_type == "total" else 0.0)
+    return [round(float(value), 6) for value in features]
+
+
 def quality_score(sport: str, home: dict[str, Any], away: dict[str, Any], keys: list[str], stats_defaulted: bool = False) -> float:
     present = 0
     for key in keys:
@@ -4371,193 +4831,126 @@ def logistic(value: float) -> float:
 
 
 class MLModelManager:
-    """Manages machine learning models for sports betting predictions"""
-    
+    """Manages candidate-level ML models for bet outcome prediction."""
+
     def __init__(self):
         self.models = {}
         self.scalers = {}
         self.feature_importance = {}
-    
+        self.feature_shapes = {}
+
     def save_models(self, path: Path = ML_MODELS_PATH) -> None:
-        """Save trained models to disk"""
         try:
             model_data = {
-                "models": {},
-                "scalers": {},
+                "models": self.models,
+                "scalers": self.scalers,
                 "feature_importance": self.feature_importance,
+                "feature_shapes": self.feature_shapes,
             }
-            
-            for sport, models in self.models.items():
-                # Convert sklearn models to serializable format
-                model_data["models"][sport] = {
-                    "random_forest": models["random_forest"],
-                    "gradient_boosting": models["gradient_boosting"],
-                }
-                model_data["scalers"][sport] = self.scalers[sport]
-            
             path.parent.mkdir(parents=True, exist_ok=True)
             import joblib
             joblib.dump(model_data, path)
             print(f"Saved ML models to {path}")
         except Exception as e:
             print(f"Error saving ML models: {e}")
-    
+
     def load_models(self, path: Path = ML_MODELS_PATH) -> bool:
-        """Load trained models from disk"""
         try:
             if not path.exists():
                 return False
-            
+
             import joblib
             model_data = joblib.load(path)
-            
-            self.models = model_data["models"]
-            self.scalers = model_data["scalers"]
+
+            self.models = model_data.get("models", {})
+            self.scalers = model_data.get("scalers", {})
             self.feature_importance = model_data.get("feature_importance", {})
-            
-            print(f"Loaded ML models for {len(self.models)} sports from {path}")
+            self.feature_shapes = model_data.get("feature_shapes", {})
+
+            print(f"Loaded ML models for {len(self.models)} model buckets from {path}")
             return True
         except Exception as e:
             print(f"Error loading ML models: {e}")
             return False
-    
-    def prepare_features(self, home: dict[str, Any], away: dict[str, Any], sport: str) -> np.ndarray:
-        """Prepare feature vector for ML model"""
-        features = [
-            home["win_pct"],
-            away["win_pct"],
-            home["home_pct"],
-            away["road_pct"],
-            home.get("last_10_win_pct", home["win_pct"]),
-            away.get("last_10_win_pct", away["win_pct"]),
-            home.get("last_5_win_pct", home["win_pct"]),
-            away.get("last_5_win_pct", away["win_pct"]),
-        ]
-        
-        # Add sport-specific features
-        if sport in BASEBALL_SPORTS:
-            features.extend([
-                home["runs_pg"],
-                away["runs_pg"],
-                home["team_era"],
-                away["team_era"],
-                home["starter_era"],
-                away["starter_era"],
-            ])
-        elif sport in BASKETBALL_SPORTS:
-            features.extend([
-                home["avg_points"],
-                away["avg_points"],
-                home["fg_pct"],
-                away["fg_pct"],
-                home["three_pct"],
-                away["three_pct"],
-                home["avg_assists"],
-                away["avg_assists"],
-                home["avg_rebounds"],
-                away["avg_rebounds"],
-            ])
-        elif sport in HOCKEY_SPORTS:
-            features.extend([
-                home["goals_pg"],
-                away["goals_pg"],
-                home["save_pct"],
-                away["save_pct"],
-                home["points_pct"],
-                away["points_pct"],
-            ])
-        elif sport in FOOTBALL_SPORTS:
-            features.extend([
-                home["points_pct"],
-                away["points_pct"],
-            ])
-        elif sport in SOCCER_SPORTS:
-            features.extend([
-                home["goals_pg"],
-                away["goals_pg"],
-                home["shots_on_target_pg"],
-                away["shots_on_target_pg"],
-                home["possession_pct"],
-                away["possession_pct"],
-                home["points_pct"],
-                away["points_pct"],
-            ])
-        
-        return np.array(features)
-    
-    def train_model(self, sport: str, X: np.ndarray, y: np.ndarray) -> dict[str, Any]:
-        """Train ensemble ML model for a sport"""
-        if len(X) < 10:
+
+    def train_model(self, model_key: str, X: np.ndarray, y: np.ndarray) -> dict[str, Any]:
+        if len(X) < 20:
             return {"success": False, "error": "Not enough training data"}
-        
-        # Split data
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        # Scale features
+        if len(set(y.tolist())) < 2:
+            return {"success": False, "error": "Need both win and loss examples"}
+
+        class_counts = np.bincount(y.astype(int))
+        if len(class_counts) < 2 or min(class_counts) < 4:
+            return {"success": False, "error": "Class balance too thin"}
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=0.25,
+            random_state=42,
+            stratify=y,
+        )
+
         scaler = StandardScaler()
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
-        
-        # Train Random Forest
+
         rf_model = RandomForestClassifier(
             n_estimators=100,
             max_depth=10,
             min_samples_split=5,
             random_state=42,
-            n_jobs=-1
+            n_jobs=-1,
         )
         rf_model.fit(X_train_scaled, y_train)
-        
-        # Train Gradient Boosting
+
         gb_model = GradientBoostingClassifier(
             n_estimators=100,
             max_depth=5,
             learning_rate=0.1,
-            random_state=42
+            random_state=42,
         )
         gb_model.fit(X_train_scaled, y_train)
-        
-        # Evaluate models
+
         rf_pred = rf_model.predict_proba(X_test_scaled)[:, 1]
         gb_pred = gb_model.predict_proba(X_test_scaled)[:, 1]
-        
         rf_auc = roc_auc_score(y_test, rf_pred) if len(set(y_test)) > 1 else 0.5
         gb_auc = roc_auc_score(y_test, gb_pred) if len(set(y_test)) > 1 else 0.5
-        
-        # Store models
-        self.models[sport] = {
+
+        self.models[model_key] = {
             "random_forest": rf_model,
             "gradient_boosting": gb_model,
         }
-        self.scalers[sport] = scaler
-        self.feature_importance[sport] = {
+        self.scalers[model_key] = scaler
+        self.feature_importance[model_key] = {
             "random_forest": rf_model.feature_importances_.tolist(),
             "gradient_boosting": gb_model.feature_importances_.tolist(),
         }
-        
+        self.feature_shapes[model_key] = int(X.shape[1])
+
         return {
             "success": True,
             "rf_auc": rf_auc,
             "gb_auc": gb_auc,
             "ensemble_auc": (rf_auc + gb_auc) / 2,
         }
-    
-    def predict(self, sport: str, home: dict[str, Any], away: dict[str, Any]) -> float:
-        """Make ensemble prediction using ML models"""
-        if sport not in self.models:
+
+    def predict_market(self, sport: str, market_type: str, features: list[float] | None) -> float | None:
+        if not features:
             return None
-        
-        features = self.prepare_features(home, away, sport)
-        features_scaled = self.scalers[sport].transform(features.reshape(1, -1))
-        
-        # Get predictions from both models
-        rf_prob = self.models[sport]["random_forest"].predict_proba(features_scaled)[0, 1]
-        gb_prob = self.models[sport]["gradient_boosting"].predict_proba(features_scaled)[0, 1]
-        
-        # Ensemble prediction (weighted average)
+        model_key = f"{sport}:{market_type}"
+        if model_key not in self.models or model_key not in self.scalers:
+            return None
+        expected_shape = int(self.feature_shapes.get(model_key, 0))
+        if expected_shape and len(features) != expected_shape:
+            return None
+
+        feature_array = np.array(features, dtype=float).reshape(1, -1)
+        features_scaled = self.scalers[model_key].transform(feature_array)
+        rf_prob = self.models[model_key]["random_forest"].predict_proba(features_scaled)[0, 1]
+        gb_prob = self.models[model_key]["gradient_boosting"].predict_proba(features_scaled)[0, 1]
         ensemble_prob = (rf_prob * 0.5) + (gb_prob * 0.5)
-        
-        return ensemble_prob
+        return clamp(float(ensemble_prob), 0.01, 0.99)
 
 
 # Global ML model manager
@@ -4621,63 +5014,54 @@ def load_model_results_map() -> dict[str, dict[str, str]]:
 
 
 def prepare_training_data(historical_data: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    """Prepare training data from historical records using actual game outcomes"""
+    """Prepare candidate-level training data from historical snapshots."""
     training_data = {}
-    
-    # Load actual game outcomes from model_results.csv
     model_results = load_model_results_map()
     print(f"Loaded {len(model_results)} settled results for training")
-    
+
     for day_iso, day_data in historical_data.items():
         for candidate in day_data.get("candidates", []):
             sport = candidate.get("sport")
-            if not sport:
+            market_type = candidate.get("marketType") or candidate.get("market_type")
+            if not sport or not market_type:
                 continue
-            
-            if sport not in training_data:
-                training_data[sport] = {"X": [], "y": []}
-            
-            # Extract features from candidate
+
+            model_key = f"{sport}:{str(market_type).strip().lower()}"
+            if model_key not in training_data:
+                training_data[model_key] = {"X": [], "y": []}
+
             try:
-                # Get model data if available
-                model_data = candidate.get("model", {})
-                if not model_data:
-                    continue
-                
-                # Match candidate with actual result
                 bet_id = candidate.get("id", "")
                 result_data = model_results.get(bet_id)
-                
                 if not result_data:
-                    # No settled result for this candidate, skip
                     continue
-                
+
                 result = result_data["result"]
-                # Use actual game outcome as label: 1 for win, 0 for loss, skip pushes
                 if result == "push":
                     continue
                 label = 1 if result == "win" else 0
-                
-                # Create feature vector (simplified)
-                features = [
-                    candidate.get("dataQuality", 50) / 100.0,
-                    candidate.get("sampleSize", 0) / 100.0,
-                ]
-                
-                training_data[sport]["X"].append(features)
-                training_data[sport]["y"].append(label)
-            except Exception as e:
+
+                features = candidate.get("training_features", [])
+                if not isinstance(features, list) or not features:
+                    features = [
+                        candidate.get("dataQuality", 50) / 100.0,
+                        candidate.get("sampleSize", 0) / 100.0,
+                        parse_probability(candidate.get("fair_probability_pct")) or 0.5,
+                        parse_probability(candidate.get("true_probability_pct")) or 0.5,
+                    ]
+
+                training_data[model_key]["X"].append([float(value) for value in features])
+                training_data[model_key]["y"].append(label)
+            except Exception:
                 continue
-    
-    # Print training data summary
-    for sport, data in training_data.items():
-        print(f"{sport}: {len(data['X'])} samples, {sum(data['y'])} wins")
-    
+
+    for model_key, data in training_data.items():
+        print(f"{model_key}: {len(data['X'])} samples, {sum(data['y'])} wins")
+
     return training_data
 
 
 def train_ml_models_from_historical_data() -> dict[str, Any]:
-    """Train ML models using historical data"""
     historical_data = load_historical_data()
     if not historical_data:
         print("No historical data available for training")
@@ -4689,27 +5073,26 @@ def train_ml_models_from_historical_data() -> dict[str, Any]:
     training_data = prepare_training_data(historical_data)
     
     results = {}
-    for sport, data in training_data.items():
-        if len(data["X"]) < 10:
-            print(f"Not enough data for {sport} ({len(data['X'])} samples)")
+    for model_key, data in training_data.items():
+        if len(data["X"]) < 20:
+            print(f"Not enough data for {model_key} ({len(data['X'])} samples)")
             continue
-        
+
         X = np.array(data["X"])
         y = np.array(data["y"])
-        
-        print(f"Training ML model for {sport} with {len(X)} samples")
-        result = ml_manager.train_model(sport, X, y)
-        results[sport] = result
-        
+
+        print(f"Training ML model for {model_key} with {len(X)} samples")
+        result = ml_manager.train_model(model_key, X, y)
+        results[model_key] = result
+
         if result.get("success"):
-            print(f"  {sport} RF AUC: {result.get('rf_auc', 0):.3f}")
-            print(f"  {sport} GB AUC: {result.get('gb_auc', 0):.3f}")
-            print(f"  {sport} Ensemble AUC: {result.get('ensemble_auc', 0):.3f}")
-    
-    # Save trained models to disk
+            print(f"  {model_key} RF AUC: {result.get('rf_auc', 0):.3f}")
+            print(f"  {model_key} GB AUC: {result.get('gb_auc', 0):.3f}")
+            print(f"  {model_key} Ensemble AUC: {result.get('ensemble_auc', 0):.3f}")
+
     if ml_manager.models:
         ml_manager.save_models()
-    
+
     return {"success": True, "results": results}
 
 

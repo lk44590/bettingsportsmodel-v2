@@ -7,7 +7,7 @@ Settled picks: 22
 Open picks: 3
 Provider synced: No
 
-Provider notes: Provider quota exhausted before odds sync completed.
+Provider notes: Provider sync skipped by CLI flag.
 
 Provider-safe mode: public-board model only, no hard pick cap.
 No-provider mode tightened the card to EV >= 5.25%, edge >= 4.00%, true probability >= 40.00%, quality >= 62, and daily risk cap <= 10.00%.
@@ -15,33 +15,33 @@ No-provider mode blocks official picks above +175 unless live provider support i
 
 TODAY'S OFFICIAL CARD
 
-1. MLB - Boston Red Sox at Minnesota Twins
-   Minnesota Twins moneyline @ +109
-   True 64.78% | EV 35.38% | Stake $44.68
-   Max odds -184
-   Auto model leans Minnesota Twins on win rate, venue split, and core team strength.
+1. NHL - New York Rangers at Tampa Bay Lightning
+   Tampa Bay Lightning -1.5 @ +154
+   True 49.03% | EV 24.53% | Stake $35.04
+   Max odds +104
+   Auto projected margin: 2.09 vs market -1.5.
 
-2. NHL - New York Rangers at Tampa Bay Lightning
-   Tampa Bay Lightning moneyline @ -125
-   True 69.88% | EV 25.78% | Stake $44.68
-   Max odds -232
-   Auto model leans Tampa Bay Lightning on win rate, venue split, and core team strength.
+2. MLB - San Francisco Giants at Cincinnati Reds
+   Under 9.0 @ -110
+   True 61.59% | EV 17.58% | Stake $11.71
+   Max odds -160
+   Auto total projection: 6.41 vs market 9.0.
 
-3. NBA - Orlando Magic at Philadelphia 76ers
-   Over 222.5 @ -110
-   True 58.54% | EV 11.75% | Stake $28.88
-   Max odds -141
-   Auto total projection: 229.29 vs market 222.5.
+3. MLB - Washington Nationals at Pittsburgh Pirates
+   Over 9.5 @ +100
+   True 58.41% | EV 16.82% | Stake $10.19
+   Max odds -140
+   Auto total projection: 11.23 vs market 9.5.
 
 WATCHLIST
 
 1. UCL - Sporting CP moneyline @ +500
-   True 29.52% | EV 77.14% | Edge 9.09%
-2. NHL - Tampa Bay Lightning -1.5 @ +180
-   True 53.89% | EV 50.89% | Edge 19.64%
-3. UCL - Real Madrid moneyline @ +390
-   True 31.52% | EV 54.45% | Edge 7.93%
-4. UCL - Under 4.5 @ -155
-   True 70.02% | EV 15.19% | Edge 12.81%
-5. NHL - San Jose Sharks -1.5 @ +195
-   True 38.75% | EV 14.33% | Edge 6.26%
+   True 27.46% | EV 64.78% | Edge 6.87%
+2. UCL - Real Madrid moneyline @ +340
+   True 31.13% | EV 36.96% | Edge 5.01%
+3. NHL - Buffalo Sabres +1.5 @ -218
+   True 71.32% | EV 4.03% | Edge 5.57%
+4. NHL - Tampa Bay Lightning moneyline @ -162
+   True 64.55% | EV 4.40% | Edge 5.21%
+5. NHL - Florida Panthers +1.5 @ -198
+   True 68.83% | EV 3.60% | Edge 5.14%
